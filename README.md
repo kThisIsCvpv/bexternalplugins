@@ -6,6 +6,14 @@ You can join their Discord via the following URL: https://discord.gg/mezdbNZ
 
 Please direct any help / support / inquires / requests there as well.
 
+# Plugin Installation
+
+1. Press ``Win + R``
+2. Type in ``%USERPROFILE%/.runelite``
+3. Create a folder named ``bexternalplugins`` if it does not already exist.
+4. Drag plugins into that folder.
+5. Restart your BlueLite.
+
 # Socket
 
 Socket is a peer to peer connection plugin.
@@ -23,21 +31,25 @@ Users join a server room and broadcast messages amongst each other.
 
 ![alt text](https://www.kthisiscvpv.com/RZ8xV15873467140DE6o.png "Plugin Settings")
 
-Server Address:
+**Server Address:**
 
-> The IP address or host name of the server to connect to.
+> Description: The IP address or host name of the server to connect to.
+> Default: socket.kthisiscvpv.com
 
-Server Port:
+**Server Port:**
 
-> The open port number of the server.
+> Description: The open port number of the server.
+> Default: 25340
 
-Server Room:
+**Server Room:**
 
-> A valid positive integer (per Java's defination) that depicts a room number to join on the server.
+> Description: A valid positive integer (per Java's defination) that depicts a room number to join on the server.
+> Default: 1
 
-Shared Password:
+**Shared Password:**
 
-> A password shared between your peers to encrypt and decrypt the bounding packets.
+> Description: A password shared between your peers to encrypt and decrypt the bounding packets.
+> Default: Randomally Generated
 
 ## Socket Server
 
@@ -54,6 +66,8 @@ Shared Password:
 
 # Sotetseg (Extended)
 
+[Source Code](./sotetseg)
+
 A standalone extension of the Theatre of Blood plugins. This plugin will send and receive all mazes amongst those in your domain.
 
 ![alt text](https://www.kthisiscvpv.com/vtNeo1587347912tMYaN.png "Plugin Visual")
@@ -66,6 +80,7 @@ A standalone extension of the Theatre of Blood plugins. This plugin will send an
 
 ![alt text](https://www.kthisiscvpv.com/DRySJ1587347714fWCmS.png "Plugin Settings")
 
-Maze Color:
+**Maze Color:**
 
-> The color of the maze tile you wish to draw.
+> Description: The color of the maze being sent and drawn.
+> Default: GREEN
