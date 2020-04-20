@@ -14,7 +14,7 @@ public interface SotetsegConfig extends Config {
             position = 0,
             keyName = "getMazeColor",
             name = "Maze Color",
-            description = "The color of the maze being sent."
+            description = "The color of the maze being sent and drawn."
     )
     default Color getMazeColor() {
         return Color.GREEN;

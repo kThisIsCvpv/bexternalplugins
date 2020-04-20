@@ -51,6 +51,34 @@ Users join a server room and broadcast messages amongst each other.
 > Description: A password shared between your peers to encrypt and decrypt the bounding packets.
 > Default: Randomally Generated
 
+### API Documentation
+
+To listen to packets being sent on the network, create an event listener on ``SocketReceivePacket``.
+
+```
+    @Subscribe
+    public void onSocketReceivePacket(SocketReceivePacket event) {
+        try {
+            JSONObject payload = event.getPayload();
+            System.out.println(payload.toString(4));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+```
+
+To send packets to the network, invoke an event on ``SocketBroadcastPacket``.
+
+```
+	...
+
+	JSONObject payload = new JSONObject();
+	payload.put("my-name", "Charles");
+	eventBus.post(new SocketBroadcastPacket(payload));
+	
+	...
+```
+
 ## Socket Server
 
 [Source Code](./SocketTunnel)

@@ -252,13 +252,9 @@ public class SocketPlugin extends Plugin implements Runnable {
 
     @Subscribe
     public void onConfigChanged(ConfigChanged event) {
-        // event.getGroup() -> SocketPlugin
-        // event.getKey() -> getServerPort
-        // event.getNewValue() -> 25340
-
         // I'm lazy.
         if (event.getGroup().equals("SocketPlugin")) {
-            this.client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "<col=ff0000>Configuration changed. Please restart the plugin to see updates.", null);
+            this.clientThread.invoke(() -> this.client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "<col=ff0000>Configuration changed. Please restart the plugin to see updates.", null));
         }
 
         // This works, but honestly, it's slow.
