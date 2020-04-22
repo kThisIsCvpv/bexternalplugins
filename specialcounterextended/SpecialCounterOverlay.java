@@ -35,7 +35,7 @@ public class SpecialCounterOverlay extends Overlay {
 
         setPosition(OverlayPosition.DYNAMIC);
         setPriority(OverlayPriority.HIGH);
-        setLayer(OverlayLayer.ABOVE_SCENE);
+        setLayer(OverlayLayer.ALWAYS_ON_TOP);
     }
 
     public void addOverlay(String player, SpecialIcon icon) {
@@ -61,7 +61,7 @@ public class SpecialCounterOverlay extends Overlay {
             if (center != null) {
                 ArrayList<SpecialIcon> icons = this.drawings.get(playerName);
                 ArrayList<SpecialIcon> removeIcons = new ArrayList<>();
-                int currentHeight = 200; // Base height.
+                int currentHeight = 200; // Base height for a player.
 
                 for (int i = (icons.size() - 1); i >= 0; i--) {
                     SpecialIcon icon = icons.get(i);
@@ -76,10 +76,11 @@ public class SpecialCounterOverlay extends Overlay {
                     }
 
                     float opacity = ((float) timeRemaining) / ((float) fadeDelay);
-                    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+                    float thresh = Math.min(opacity + 0.2f, 1.0f);
+                    graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, thresh));
 
                     final int maxHeight = Math.max(config.getMaxHeight(), 1);
-                    int updatedHeight = maxHeight - (int) (((float) maxHeight) * opacity);
+                    int updatedHeight = maxHeight - (int) (((float) maxHeight) * thresh);
 
                     Point drawPoint = Perspective.getCanvasImageLocation(this.client, center, icon.getImage(), currentHeight + updatedHeight);
                     graphics.drawImage(icon.getImage(), drawPoint.getX(), drawPoint.getY(), null);

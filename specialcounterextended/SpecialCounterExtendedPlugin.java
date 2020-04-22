@@ -14,10 +14,12 @@ import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.kit.KitType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -84,6 +86,10 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         lastSpecTarget = null;
         lastSpecTick = -1;
         interactedNpcIds.clear();
+
+        specialUsed = false;
+        specialExperience = -1;
+
         this.overlayManager.add(this.overlay);
     }
 
@@ -116,6 +122,9 @@ public class SpecialCounterExtendedPlugin extends Plugin {
     private final Set<Integer> interactedNpcIds = new HashSet<>();
     private final SpecialCounter[] specialCounter = new SpecialCounter[SpecialWeapon.values().length];
 
+    private boolean specialUsed = false;
+    private long specialExperience = -1;
+
     @Subscribe // Player changed attack targets after queuing special.
     public void onInteractingChanged(InteractingChanged interactingChanged) {
         Actor source = interactingChanged.getSource();
@@ -139,8 +148,43 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         this.specialPercentage = specialPercentage;
         this.specialWeapon = usedSpecialWeapon();
 
-        lastSpecTarget = client.getLocalPlayer().getInteracting();
-        lastSpecTick = client.getTickCount();
+        this.lastSpecTarget = client.getLocalPlayer().getInteracting();
+        this.lastSpecTick = client.getTickCount();
+
+        this.specialUsed = true;
+        this.specialExperience = this.client.getOverallExperience();
+    }
+
+    @Subscribe // For Dawnbringer, EXP tracked.
+    public void onGameTick(GameTick event) {
+        if (client.getGameState() != GameState.LOGGED_IN)
+            return;
+
+        if (this.specialExperience != -1 && this.specialUsed && this.lastSpecTarget != null && this.lastSpecTarget instanceof NPC) {
+            this.specialUsed = false;
+
+            long deltaExp = this.client.getOverallExperience() - this.specialExperience;
+            this.specialExperience = -1;
+
+            if (this.specialWeapon != null && this.specialWeapon == SpecialWeapon.DAWNBRINGER) {
+                int damage = (int) (((double) deltaExp) / 3.5d);
+
+                String pName = this.client.getLocalPlayer().getName();
+                updateCounter(pName, this.specialWeapon, null, damage);
+
+                JSONObject data = new JSONObject();
+                data.put("player", pName);
+                data.put("target", ((NPC) this.lastSpecTarget).getId());
+                data.put("weapon", specialWeapon.ordinal());
+                data.put("hit", damage);
+
+                JSONObject payload = new JSONObject();
+                payload.put("special-extended", data);
+                eventBus.post(new SocketBroadcastPacket(payload));
+
+                this.lastSpecTarget = null;
+            }
+        }
     }
 
     @Subscribe
@@ -161,6 +205,8 @@ public class SpecialCounterExtendedPlugin extends Plugin {
 
         boolean wasSpec = lastSpecTarget != null;
         lastSpecTarget = null;
+        specialUsed = false;
+        specialExperience = -1L;
 
         if (!(target instanceof NPC))
             return;
@@ -254,7 +300,8 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         SpecialCounter counter = specialCounter[specialWeapon.ordinal()];
 
         BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
-        this.overlay.addOverlay(player, new SpecialIcon(image, specialWeapon.isDamage() ? Integer.toString(hit) : null, System.currentTimeMillis()));
+//        this.overlay.addOverlay(player, new SpecialIcon(image, specialWeapon.isDamage() ? Integer.toString(hit) : null, System.currentTimeMillis()));
+        this.overlay.addOverlay(player, new SpecialIcon(image, Integer.toString(hit), System.currentTimeMillis()));
 
         if (counter == null) {
             counter = new SpecialCounter(image, this,

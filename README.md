@@ -121,6 +121,8 @@ A standalone extension of the default ``Special Attack Counter`` plugin. This pl
 
 ![alt text](https://www.kthisiscvpv.com/azgkm1587524036HW5Vh.gif "Plugin Visual")
 
+![alt text](https://www.kthisiscvpv.com/jIOBV1587559442NdOUj.gif "Plugin Visual")
+
 ### Dependencies
 
 > Socket Client Plugin
