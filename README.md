@@ -119,7 +119,7 @@ A standalone extension of the Theatre of Blood plugins. This plugin will send an
 
 A standalone extension of the default ``Special Attack Counter`` plugin. This plugin will send and receive all special attacks amongst those in your domain.
 
-![alt text](https://www.kthisiscvpv.com/ZqR5u1587523728Ofo5j.gif "Plugin Visual")
+![alt text](https://www.kthisiscvpv.com/azgkm1587524036HW5Vh.gif "Plugin Visual")
 
 ### Dependencies
 
