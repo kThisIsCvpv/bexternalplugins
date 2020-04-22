@@ -8,11 +8,22 @@ Please direct any help / support / inquires / requests there as well.
 
 # Plugin Installation
 
+## Windows
+
 1. Press ``Win + R``
 2. Type in ``%USERPROFILE%/.runelite``
 3. Create a folder named ``bexternalplugins`` if it does not already exist.
 4. Drag plugins into that folder.
 5. Restart your BlueLite.
+
+## Mac (Untested)
+
+1. Open Terminal.
+2. Run ``cd ~/.runelite``
+3. Run ``mkdir -p bexternalplugins``
+4. Run ``open .``
+5. Drag plugins into ``bexternalplugins``
+6. Restart your BlueLite.
 
 # Socket
 
