@@ -112,3 +112,38 @@ A standalone extension of the Theatre of Blood plugins. This plugin will send an
 
 > Description: The color of the maze being sent and drawn.
 > Default: GREEN
+
+# Special Counter (Extended)
+
+[Source Code](./specialcounterextended)
+
+A standalone extension of the default ``Special Attack Counter`` plugin. This plugin will send and receive all special attacks amongst those in your domain.
+
+![alt text](https://www.kthisiscvpv.com/ZqR5u1587523728Ofo5j.gif "Plugin Visual")
+
+### Dependencies
+
+> Socket Client Plugin
+
+### Exclusions (TURN THESE OFF)
+
+> Special Attack Counter
+
+### Configuration
+
+![alt text](https://www.kthisiscvpv.com/Rexft1587523779KWOPt.png "Plugin Settings")
+
+**Hit Overlay:**
+
+> Description: Show the special attack overlay.
+> Default: true
+
+**Fade Delay:**
+
+> Description: Delay, in milliseconds, until the icon disappears.
+> Default: 5000ms
+
+**Travel Height:**
+
+> Description: Maximum height, in pixels, for the icon to travel.
+> Default: 200px
