@@ -42,7 +42,17 @@ public class SotetsegOverlay extends Overlay {
                         continue;
 
                     final Color color = this.config.getMazeColor();
-                    OverlayUtil.renderPolygon(graphics, poly, color);
+                    graphics.setColor(color);
+
+                    final Stroke originalStroke = graphics.getStroke();
+
+                    final int strokeSize = Math.max(this.config.getStokeSize(), 1);
+                    graphics.setStroke(new BasicStroke(strokeSize));
+                    graphics.draw(poly);
+                    graphics.setColor(new Color(0, 0, 0, 50));
+                    graphics.fill(poly);
+
+                    graphics.setStroke(originalStroke);
                 }
             }
         }

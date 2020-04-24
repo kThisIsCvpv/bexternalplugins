@@ -19,4 +19,14 @@ public interface SotetsegConfig extends Config {
     default Color getMazeColor() {
         return Color.GREEN;
     }
+
+    @ConfigItem(
+            position = 1,
+            keyName = "getStokeSize",
+            name = "Stoke Size",
+            description = "The stroke size of the maze tiles."
+    )
+    default int getStokeSize() {
+        return 1;
+    }
 }
