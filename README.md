@@ -124,6 +124,11 @@ A standalone extension of the Theatre of Blood plugins. This plugin will send an
 > Description: The color of the maze being sent and drawn.
 > Default: GREEN
 
+**Stroke Size:**
+
+> Description: The size of the stroke when drawing the tiles.
+> Default: 1
+
 # Special Counter (Extended)
 
 [Source Code](./specialcounterextended)
