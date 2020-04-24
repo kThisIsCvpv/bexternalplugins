@@ -46,7 +46,7 @@ public class SotetsegOverlay extends Overlay {
 
                     final Stroke originalStroke = graphics.getStroke();
 
-                    final int strokeSize = Math.max(this.config.getStokeSize(), 1);
+                    final int strokeSize = Math.max(this.config.getStrokeSize(), 1);
                     graphics.setStroke(new BasicStroke(strokeSize));
                     graphics.draw(poly);
                     graphics.setColor(new Color(0, 0, 0, 50));

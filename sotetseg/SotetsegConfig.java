@@ -22,11 +22,11 @@ public interface SotetsegConfig extends Config {
 
     @ConfigItem(
             position = 1,
-            keyName = "getStokeSize",
-            name = "Stoke Size",
+            keyName = "getStrokeSize",
+            name = "Stroke Size",
             description = "The stroke size of the maze tiles."
     )
-    default int getStokeSize() {
+    default int getStrokeSize() {
         return 1;
     }
 }
