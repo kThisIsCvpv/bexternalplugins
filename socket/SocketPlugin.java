@@ -2,6 +2,7 @@ package net.runelite.client.plugins.socket;
 
 import com.google.inject.Inject;
 import com.google.inject.Provides;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
@@ -15,6 +16,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.socket.messages.server.Join;
 import net.runelite.client.plugins.socket.messages.server.Leave;
 import net.runelite.client.plugins.socket.socket.CWSClient;
+import net.runelite.client.util.Text;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit;
         tags = {"socket", "server", "discord", "connection", "broadcast"},
         enabledByDefault = false
 )
+@Slf4j
 public class SocketPlugin extends Plugin
 {
 	@Inject
@@ -53,7 +56,7 @@ public class SocketPlugin extends Plugin
 		String name = "Unknown";
 		if (client.getLocalPlayer() != null && client.getLocalPlayer().getName() != null && !client.getLocalPlayer().getName().isEmpty())
 		{
-			name = client.getLocalPlayer().getName();
+			name = Text.sanitize(client.getLocalPlayer().getName());
 		}
 		cwsClient.createConnection(config.getServerAddress(), config.getSalt(), config.getServerPort(),
 				config.getRoom(), name,
@@ -82,15 +85,33 @@ public class SocketPlugin extends Plugin
 	@Subscribe
 	protected void onJoin(Join join)
 	{
-		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
-				String.format("<col=ff0000>%s has joined the room", join.getName()), null));
+		String name;
+		try
+		{
+			name = SocketAESEncryption.decrypt(config.getSalt(), join.getName());
+			clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
+					String.format("<col=ff0000>%s has joined the room", name), null));
+		}
+		catch (Exception exception)
+		{
+			log.warn("Error decrypting name", exception);
+		}
 	}
 
 	@Subscribe
 	protected void onLeave(Leave leave)
 	{
-		clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
-				String.format("<col=ff0000>%s has left the room", leave.getName()), null));
+		String name;
+		try
+		{
+			name = SocketAESEncryption.decrypt(config.getSalt(), leave.getName());
+			clientThread.invoke(() -> client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
+					String.format("<col=ff0000>%s has joined the room", name), null));
+		}
+		catch (Exception exception)
+		{
+			log.warn("Error decrypting name", exception);
+		}
 	}
 
 	@Override

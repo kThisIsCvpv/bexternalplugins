@@ -79,13 +79,14 @@ public class CWSClient implements SocketListener, AutoCloseable
 			try
 			{
 				clientsocket.connectBlocking();
-				sendServerMessage(new Join(room, name));
+				String encryptedName = SocketAESEncryption.encrypt(secret, name);
+				sendServerMessage(new Join(room, encryptedName));
 				if (callback != null)
 				{
 					callback.run();
 				}
 			}
-			catch (InterruptedException e)
+			catch (Exception e)
 			{
 				log.debug("Error setting up connection", e);
 			}
