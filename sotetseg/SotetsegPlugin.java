@@ -3,6 +3,7 @@ package net.runelite.client.plugins.sotetseg;
 import com.google.inject.Provides;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GroundObject;
 import net.runelite.api.NPC;
@@ -34,6 +35,7 @@ import java.util.Set;
         tags = {"socket", "server", "discord", "connection", "broadcast", "sotetseg", "theatre", "tob"},
         enabledByDefault = false
 )
+@Slf4j
 public class SotetsegPlugin extends Plugin {
 
     @Inject

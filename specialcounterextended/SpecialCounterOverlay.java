@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class SpecialCounterOverlay extends Overlay {
@@ -52,12 +53,18 @@ public class SpecialCounterOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         ArrayList<String> removePlayers = new ArrayList<>();
 
-        Map<String, LocalPoint> locations = new HashMap<>();
+        HashSet<Player> players = new HashSet<>();
         for (Player player : this.client.getPlayers())
-            locations.put(player.getName(), player.getLocalLocation());
+        {
+            if (drawings.containsKey(player.getName()))
+            {
+                players.add(player);
+            }
+        }
 
-        for (String playerName : this.drawings.keySet()) {
-            LocalPoint center = locations.get(playerName);
+        for (Player player : players) {
+            String playerName = player.getName();
+            LocalPoint center = player.getLocalLocation();
             if (center != null) {
                 ArrayList<SpecialIcon> icons = this.drawings.get(playerName);
                 ArrayList<SpecialIcon> removeIcons = new ArrayList<>();
@@ -109,7 +116,9 @@ public class SpecialCounterOverlay extends Overlay {
         }
 
         for (String playerName : removePlayers)
+        {
             this.drawings.remove(playerName);
+        }
 
         return null;
     }

@@ -168,7 +168,9 @@ public class SpecialCounterExtendedPlugin extends Plugin {
                 int damage = (int) (((double) deltaExp) / 3.5d);
 
                 String pName = this.client.getLocalPlayer().getName();
-                updateCounter(pName, this.specialWeapon, null, damage);
+                updateCounter(this.specialWeapon, null, damage);
+                BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
+                overlay.addOverlay(pName, new SpecialIcon(image, Integer.toString(damage), System.currentTimeMillis()));
 
                 SpecialAttackMessage specialAttackMessage = new SpecialAttackMessage(pName,
                         ((NPC) lastSpecTarget).getId(), specialWeapon.ordinal(), damage);
@@ -218,10 +220,12 @@ public class SpecialCounterExtendedPlugin extends Plugin {
             log.debug("Special attack target: id: {} - target: {} - weapon: {} - amount: {}", interactingId, target, specialWeapon, hit);
 
             final String pName = this.client.getLocalPlayer().getName();
-            updateCounter(pName, specialWeapon, null, hit);
+            updateCounter(specialWeapon, null, hit);
+            BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
+            overlay.addOverlay(pName, new SpecialIcon(image, Integer.toString(hit), System.currentTimeMillis()));
 
             SpecialAttackMessage specialAttackMessage = new SpecialAttackMessage(pName,
-                    ((NPC) lastSpecTarget).getId(), specialWeapon.ordinal(), hit);
+                    interactingId, specialWeapon.ordinal(), hit);
 
             cwsClient.sendEndToEndEncrypted(specialAttackMessage);
         }
@@ -248,8 +252,11 @@ public class SpecialCounterExtendedPlugin extends Plugin {
             // Otherwise we only add the count if it is against a npc we are already tracking
             if (interactedNpcIds.contains(specialAttackMessage.getTarget()))
             {
-                updateCounter(attacker, weapon, attacker, specialAttackMessage.getHit());
+                updateCounter(weapon, attacker, specialAttackMessage.getHit());
             }
+
+            BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
+            overlay.addOverlay(attacker, new SpecialIcon(image, Integer.toString(specialAttackMessage.getHit()), System.currentTimeMillis()));
         });
     }
 
@@ -287,11 +294,10 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         return null;
     }
 
-    private void updateCounter(String player, SpecialWeapon specialWeapon, String name, int hit) {
+    private void updateCounter(SpecialWeapon specialWeapon, String name, int hit) {
         SpecialCounter counter = specialCounter[specialWeapon.ordinal()];
 
         BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
-        overlay.addOverlay(player, new SpecialIcon(image, Integer.toString(hit), System.currentTimeMillis()));
 
         if (counter == null) {
             counter = new SpecialCounter(image, this,
