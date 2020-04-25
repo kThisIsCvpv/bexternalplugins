@@ -19,10 +19,7 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.socket.org.json.JSONArray;
-import net.runelite.client.plugins.socket.org.json.JSONObject;
-import net.runelite.client.plugins.socket.packet.SocketBroadcastPacket;
-import net.runelite.client.plugins.socket.packet.SocketReceivePacket;
+import net.runelite.client.plugins.socket.socket.CWSClient;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import javax.inject.Inject;
@@ -50,6 +47,9 @@ public class SotetsegPlugin extends Plugin {
 
     @Inject
     private SotetsegConfig config;
+
+    @Inject
+    private CWSClient cwsClient;
 
     @Provides
     SotetsegConfig getConfig(ConfigManager configManager) {
@@ -154,49 +154,30 @@ public class SotetsegPlugin extends Plugin {
                 if (this.dispatchCount > 0) { // Ensure we only send the data a couple times.
                     this.dispatchCount--;
 
-                    JSONArray data = new JSONArray();
+                    MazePing mazePing = new MazePing(new MazePing.MazeTile[redTiles.size()]);
 
+                    int i = 0;
                     for (final Point p : this.redTiles) {
                         WorldPoint wp = this.translateMazePoint(p);
 
-                        JSONObject jsonwp = new JSONObject();
-                        jsonwp.put("x", wp.getX());
-                        jsonwp.put("y", wp.getY());
-                        jsonwp.put("plane", wp.getPlane());
-
-                        data.put(jsonwp);
+                        mazePing.getMazeTiles()[i] = new MazePing.MazeTile(wp.getX(), wp.getY(), wp.getPlane());
+                        i++;
                     }
 
-                    JSONObject payload = new JSONObject();
-                    payload.put("sotetseg-extended", data);
-
-                    eventBus.post(new SocketBroadcastPacket(payload));
+                    cwsClient.sendEndToEndEncrypted(mazePing);
                 }
             }
         }
     }
 
     @Subscribe
-    public void onSocketReceivePacket(SocketReceivePacket event) {
-        try {
-            JSONObject payload = event.getPayload();
-            if (!payload.has("sotetseg-extended"))
-                return;
+    public void onMazePing(MazePing mazePing) {
 
-            this.mazePings.clear();
-
-            JSONArray data = payload.getJSONArray("sotetseg-extended");
-            for (int i = 0; i < data.length(); i++) {
-                JSONObject jsonwp = data.getJSONObject(i);
-                int x = jsonwp.getInt("x");
-                int y = jsonwp.getInt("y");
-                int plane = jsonwp.getInt("plane");
-
-                WorldPoint wp = new WorldPoint(x, y, plane);
-                this.mazePings.add(wp);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        mazePings.clear();
+        for (MazePing.MazeTile mazeTile : mazePing.getMazeTiles())
+        {
+                WorldPoint wp = new WorldPoint(mazeTile.getX(), mazeTile.getY(), mazeTile.getPlane());
+                mazePings.add(wp);
         }
     }
 
