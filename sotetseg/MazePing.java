@@ -14,7 +14,7 @@ public class MazePing extends ClientsocketMessage
 	@AllArgsConstructor
 	@EqualsAndHashCode(callSuper = false)
 	static
-	class MazeTile extends ClientsocketMessage
+	class MazeTile
 	{
 		private int x;
 		private int y;

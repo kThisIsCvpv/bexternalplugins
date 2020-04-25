@@ -92,11 +92,13 @@ public class SotetsegPlugin extends Plugin {
         this.overworldRegionID = -1;
 
         this.overlayManager.add(this.overlay);
+        cwsClient.registerMessage(MazePing.class);
     }
 
     @Override
     protected void shutDown() {
         this.overlayManager.remove(this.overlay);
+        cwsClient.unregisterMessage(MazePing.class);
     }
 
     @Subscribe // Boss has entered the scene. Played has entered the room.
