@@ -137,6 +137,8 @@ public class RLClient implements Runnable {
 						party.put(client.clientName);
 					response.put("party", party);
 
+					response.put("player", this.clientName);
+
 					this.sendPacketToRoom(Base64.getEncoder().encodeToString(response.toString().getBytes()));
 
 					this.lastHeartbeat = System.currentTimeMillis();
