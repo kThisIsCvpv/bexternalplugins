@@ -10,12 +10,6 @@ import java.util.Base64;
  */
 public class SHA256 {
 
-	public static void main(String[] args) throws Exception {
-		String origin = "kThisIsCvpv";
-		String hashed = encrypt(origin);
-		System.out.printf("Standard: %s\nSHA-256: %s", origin, hashed);
-	}
-
 	/**
 	 * Encrypts a given String using SHA-256 and returns the Base64 conversion output.
 	 * @param origin The original string

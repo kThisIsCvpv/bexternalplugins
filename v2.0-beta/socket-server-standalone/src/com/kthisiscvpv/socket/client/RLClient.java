@@ -93,8 +93,13 @@ public class RLClient implements Runnable {
 				}
 
 				String packet = this.inputStream.readLine();
-				if (packet == null || packet.isEmpty())
+				if (packet == null)
 					continue;
+				
+				if(packet.isEmpty()) {
+					this.lastHeartbeat = System.currentTimeMillis();
+					continue;
+				}
 
 				this.logger.println(RLClient.class, Level.INFO, "Recieved packet from " + this.address + ": " + packet);
 
@@ -223,6 +228,8 @@ public class RLClient implements Runnable {
 			for (RLClient client : clientsClone)
 				party.put(client.clientName);
 			response.put("party", party);
+			
+			response.put("player", this.clientName);
 
 			this.sendPacketToRoom(Base64.getEncoder().encodeToString(response.toString().getBytes()));
 		}
