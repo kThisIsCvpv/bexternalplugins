@@ -415,7 +415,6 @@ public class PlayerStatusPlugin extends Plugin {
     public void onSocketReceivePacket(SocketReceivePacket event) {
         try {
             JSONObject payload = event.getPayload();
-            System.out.println(payload.toString(4));
             String localName = this.client.getLocalPlayer().getName();
 
             if (payload.has("player-status-game-add")) {

@@ -195,7 +195,7 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         Hitsplat.HitsplatType hitsplatType = hitsplat.getHitsplatType();
 
         // Ignore all hitsplats other than mine
-        if ((hitsplatType != Hitsplat.HitsplatType.DAMAGE_ME && hitsplatType != Hitsplat.HitsplatType.BLOCK_ME) || target == client.getLocalPlayer())
+        if (!hitsplat.isMine() || target == client.getLocalPlayer())
             return;
 
         log.debug("Hitsplat target: {} spec target: {}", target, lastSpecTarget);
