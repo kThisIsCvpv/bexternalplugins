@@ -141,7 +141,7 @@ public class SocketPlugin extends Plugin {
 
             PrintWriter outputStream = this.connection.getOutputStream();
             synchronized (outputStream) {
-                outputStream.println(Base64.getEncoder().encodeToString(payload.toString().getBytes()));
+                outputStream.println(payload.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -14,7 +14,7 @@ import com.kthisiscvpv.util.logger.MockLogger.Level;
 public class RLServer implements Runnable {
 
 	// This is the maximum length of the name of a room.
-	public static int MAX_ROOM_NAME_LENGTH = 32;
+	public static int MAX_ROOM_NAME_LENGTH = 64;
 
 	private AbstractLogger logger;
 	private int port;

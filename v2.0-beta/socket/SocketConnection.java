@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Base64;
 
 import static net.runelite.client.plugins.socket.SocketConfig.PASSWORD_SALT;
 
@@ -75,8 +74,6 @@ public class SocketConnection implements Runnable {
         if (this.state != SocketState.DISCONNECTED)
             return;
 
-        final Base64.Encoder encoder = Base64.getEncoder();
-        final Base64.Decoder decoder = Base64.getDecoder();
         final String secret = this.config.getPassword() + PASSWORD_SALT; // We're going to salt the password as well.
 
         this.state = SocketState.CONNECTING;
@@ -96,7 +93,7 @@ public class SocketConnection implements Runnable {
             joinPacket.put("header", SocketPacket.JOIN);
             joinPacket.put("room", SHA256.encrypt(secret));
             joinPacket.put("name", AES256.encrypt(secret, this.playerName));
-            this.outputStream.println(encoder.encodeToString(joinPacket.toString().getBytes()));
+            this.outputStream.println(joinPacket.toString());
 
             while (true) {
                 if (this.state == SocketState.DISCONNECTED || this.state == SocketState.TERMINATED)
@@ -123,14 +120,12 @@ public class SocketConnection implements Runnable {
 
                 log.info("Received packet from server: {}", packet);
 
-                String datagram = new String(decoder.decode(packet));
                 JSONObject data;
-
                 try {
-                    data = new JSONObject(datagram);
-                    log.info("Decoded JSON: {}", data);
+                    data = new JSONObject(packet);
+                    log.info("Decoded packet as JSON.");
                 } catch (JSONException e) {
-                    log.info("Bad packet. Unable to decode.");
+                    log.warn("Bad packet. Unable to decode: {}", packet);
                     continue;
                 }
 
@@ -159,7 +154,8 @@ public class SocketConnection implements Runnable {
 
                         try {
                             this.eventBus.post(new SocketPlayerJoin(targetName));
-                        } catch (Exception ignorred) { }
+                        } catch (Exception ignorred) {
+                        }
 
                     } else if (header.equals(SocketPacket.LEAVE)) { // Player has left the party.
                         String targetName = AES256.decrypt(secret, data.getString("player"));
@@ -170,7 +166,8 @@ public class SocketConnection implements Runnable {
 
                         try {
                             this.eventBus.post(new SocketPlayerLeave(targetName));
-                        } catch (Exception ignorred) { }
+                        } catch (Exception ignorred) {
+                        }
 
                     } else if (header.equals(SocketPacket.MESSAGE)) { // Socket server wishes to send you a message.
                         String message = data.getString("message");
@@ -202,12 +199,14 @@ public class SocketConnection implements Runnable {
         try { // Close the socket output stream.
             if (this.outputStream != null)
                 this.outputStream.close();
-        } catch (Exception ignorred) { }
+        } catch (Exception ignorred) {
+        }
 
         try { // Close the socket input stream.
             if (this.inputStream != null)
                 this.inputStream.close();
-        } catch (Exception ignorred) { }
+        } catch (Exception ignorred) {
+        }
 
         try { // Close the actual socket.
             if (this.socket != null) {
@@ -215,7 +214,8 @@ public class SocketConnection implements Runnable {
                 this.socket.shutdownOutput();
                 this.socket.shutdownInput();
             }
-        } catch (Exception ignorred) { }
+        } catch (Exception ignorred) {
+        }
 
         log.info("Terminated connections with the socket server.");
         if (verbose)

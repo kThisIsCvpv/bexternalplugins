@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +24,7 @@ public class RLClient implements Runnable {
 	// Server related variables.
 	private RLServer server;
 	private AbstractLogger logger;
+	private HashSet<RLClient> party;
 
 	// Socket related variables.
 	private Socket socket;
@@ -95,16 +95,16 @@ public class RLClient implements Runnable {
 				String packet = this.inputStream.readLine();
 				if (packet == null)
 					continue;
-				
-				if(packet.isEmpty()) {
+
+				if (packet.isEmpty()) {
 					this.lastHeartbeat = System.currentTimeMillis();
 					continue;
 				}
 
+				long packetParseTime = System.currentTimeMillis();
 				this.logger.println(RLClient.class, Level.INFO, "Recieved packet from " + this.address + ": " + packet);
 
-				String datagram = new String(Base64.getDecoder().decode(packet));
-				JSONObject data = new JSONObject(datagram);
+				JSONObject data = new JSONObject(packet);
 
 				if (!data.has("header"))
 					throw new NullPointerException(String.format("Packet from %s has no header", this.address));
@@ -122,13 +122,13 @@ public class RLClient implements Runnable {
 					ArrayList<RLClient> clientsClone;
 
 					synchronized (activeClients) {
-						HashSet<RLClient> roomClients = activeClients.get(this.clientRoom);
-						if (roomClients == null)
-							roomClients = new HashSet<RLClient>();
+						this.party = activeClients.get(this.clientRoom);
+						if (this.party == null)
+							this.party = new HashSet<RLClient>();
 
-						roomClients.add(this);
-						activeClients.put(this.clientRoom, roomClients);
-						clientsClone = new ArrayList<RLClient>(roomClients);
+						this.party.add(this);
+						activeClients.put(this.clientRoom, this.party);
+						clientsClone = new ArrayList<RLClient>(this.party);
 					}
 
 					this.lastHeartbeat = System.currentTimeMillis();
@@ -144,22 +144,23 @@ public class RLClient implements Runnable {
 
 					response.put("player", this.clientName);
 
-					this.sendPacketToRoom(Base64.getEncoder().encodeToString(response.toString().getBytes()));
+					this.sendPacketToRoom(response.toString());
 
 					this.lastHeartbeat = System.currentTimeMillis();
 					this.logger.println(RLClient.class, Level.INFO, "Updated party list has been sent to members of " + this.clientRoom);
 
-				} else if (this.clientName == null || this.clientName == null) {
+				} else if (this.party == null) {
 					this.logger.println(RLClient.class, Level.WARN, "Ignoring " + header + " packet from " + this.address + " as they have not joined a session yet");
 					continue;
+
+				} else if (header.equals(Packet.BROADCAST)) {
+					this.sendPacketToRoom(packet); // Sends the same packet, as is.
+					this.logger.println(RLClient.class, Level.INFO, "Packet broadcasted. Elapsed time: " + (System.currentTimeMillis() - packetParseTime) + "ms");
 
 				} else if (header.equals(Packet.PING)) {
 					this.lastHeartbeat = System.currentTimeMillis();
 					this.sendPacket(packet); // Sends the same packet, as is.
 					this.logger.println(RLClient.class, Level.INFO, this.address + " just pinged the server");
-
-				} else if (header.equals(Packet.BROADCAST)) {
-					this.sendPacketToRoom(packet); // Sends the same packet, as is.
 
 				}
 			}
@@ -186,20 +187,33 @@ public class RLClient implements Runnable {
 			} catch (Exception ignorred) {}
 		}
 
-		Map<String, HashSet<RLClient>> activeClients = this.server.getActiveClients();
-		ArrayList<RLClient> clientsClone = null;
+		if (this.party != null) {
+			synchronized (this.party) {
+				this.party.remove(this);
+			}
 
-		synchronized (activeClients) {
-			try {
-				HashSet<RLClient> roomClients = activeClients.get(this.clientRoom);
-				if (roomClients != null) {
-					roomClients.remove(this);
-					if (roomClients.isEmpty())
-						activeClients.remove(this.clientRoom);
-					else
-						clientsClone = new ArrayList<RLClient>(roomClients);
+			if (this.party.isEmpty()) {
+				Map<String, HashSet<RLClient>> activeClients = this.server.getActiveClients();
+				synchronized (activeClients) {
+					activeClients.remove(this.clientRoom);
 				}
-			} catch (Exception ignorred) {}
+
+				this.logger.println(RLClient.class, Level.INFO, "Party room is now empty. " + this.clientRoom + " has been removed");
+			} else {
+				JSONObject response = new JSONObject(); // Sends the updated party to all members.
+				response.put("header", Packet.LEAVE);
+
+				synchronized (this.party) {
+					JSONArray party = new JSONArray();
+					for (RLClient client : this.party)
+						party.put(client.clientName);
+					response.put("party", party);
+				}
+
+				response.put("player", this.clientName);
+
+				this.sendPacketToRoom(response.toString());
+			}
 		}
 
 		try {
@@ -220,20 +234,6 @@ public class RLClient implements Runnable {
 			}
 		} catch (Exception ignorred) {}
 
-		if (clientsClone != null) {
-			JSONObject response = new JSONObject(); // Sends the updated party to all members.
-			response.put("header", Packet.LEAVE);
-
-			JSONArray party = new JSONArray();
-			for (RLClient client : clientsClone)
-				party.put(client.clientName);
-			response.put("party", party);
-			
-			response.put("player", this.clientName);
-
-			this.sendPacketToRoom(Base64.getEncoder().encodeToString(response.toString().getBytes()));
-		}
-
 		this.logger.println(RLClient.class, Level.INFO, "Connection with " + this.address + " has been terminated");
 	}
 
@@ -241,7 +241,7 @@ public class RLClient implements Runnable {
 	 * Attempts to send a packet to the client.
 	 * @param packet The packet to send.
 	 */
-	public synchronized void sendPacket(String packet) {
+	public void sendPacket(String packet) {
 		try {
 			this.outputStream.println(packet);
 		} catch (Exception ex) {
@@ -256,17 +256,13 @@ public class RLClient implements Runnable {
 	 */
 	public void sendPacketToRoom(String packet) {
 		try {
-			if (this.clientName == null || this.clientRoom == null)
+			if (this.party == null)
 				throw new IllegalAccessError(this.address + " tried to broadcast before joining a room");
 
-			Map<String, HashSet<RLClient>> activeClients = this.server.getActiveClients();
 			List<RLClient> clonedList;
 
-			synchronized (activeClients) {
-				HashSet<RLClient> clients = activeClients.get(this.clientRoom);
-				if (clients == null)
-					throw new NullPointerException(this.address + " is in " + this.clientRoom + ", a room that no longer exists");
-				clonedList = new ArrayList<RLClient>(clients);
+			synchronized (this.party) {
+				clonedList = new ArrayList<RLClient>(this.party);
 			}
 
 			for (RLClient client : clonedList)
@@ -294,5 +290,13 @@ public class RLClient implements Runnable {
 	 */
 	public String getAddress() {
 		return this.address;
+	}
+
+	/**
+	 * Returns the room that the client is in.
+	 * @return The client's room name.
+	 */
+	public String getClientRoom() {
+		return this.clientRoom;
 	}
 }

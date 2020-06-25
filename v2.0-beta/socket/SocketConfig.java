@@ -6,7 +6,7 @@ import net.runelite.client.config.ConfigItem;
 
 import java.util.UUID;
 
-@ConfigGroup("SocketPlugin")
+@ConfigGroup("Socket Plugin")
 public interface SocketConfig extends Config {
 
     public static final String PASSWORD_SALT = "$P@_/gKR`y:mv)6K";
@@ -28,7 +28,7 @@ public interface SocketConfig extends Config {
             description = "The port number of the server to connect to."
     )
     default int getServerPort() {
-        return 26317;
+        return 26318;
     }
 
     @ConfigItem(

@@ -2,11 +2,15 @@ package com.kthisiscvpv;
 
 import java.util.Scanner;
 
+import org.json.JSONObject;
+
+import com.kthisiscvpv.socket.client.Packet;
+import com.kthisiscvpv.socket.client.RLClient;
 import com.kthisiscvpv.socket.server.RLServer;
 
 public class App {
 
-	private static int DEFAULT_SERVER_PORT = 26317;
+	private static int DEFAULT_SERVER_PORT = 26318;
 
 	public static void main(String[] args) throws Exception {
 		int serverPort = DEFAULT_SERVER_PORT;
@@ -27,9 +31,22 @@ public class App {
 		// Start debugging through system input
 		Scanner scanner = new Scanner(System.in);
 
-		while (scanner.nextLine() != null) {
+		while (scanner.hasNextLine()) {
+			String next = scanner.nextLine();
 			int count = server.getConnectedClients().size();
-			System.out.printf("There %s currently %d individual%s connected.\n", count != 1 ? "are" : "is", count, count != 1 ? "s" : "");
+
+			if (next.startsWith("--")) {
+				System.out.printf("There %s currently %d individual%s connected.\n", count != 1 ? "are" : "is", count, count != 1 ? "s" : "");
+			} else {
+				JSONObject obj = new JSONObject();
+				obj.put("header", Packet.MESSAGE);
+				obj.put("message", next);
+				String packet = obj.toString();
+				for (RLClient client : server.getConnectedClients())
+					if (client.getClientRoom() != null)
+						client.sendPacket(packet);
+				System.out.printf("Sent message to %d user%s: %s\n", count, count != 1 ? "s" : "", next);
+			}
 		}
 
 		scanner.close();
