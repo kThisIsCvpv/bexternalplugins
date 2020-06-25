@@ -84,7 +84,7 @@ public interface PlayerStatusConfig extends Config {
             description = "Show players who drank a prayer enhance."
     )
     default boolean showPrayerEnhance() {
-        return true;
+        return false;
     }
 
     @ConfigItem(

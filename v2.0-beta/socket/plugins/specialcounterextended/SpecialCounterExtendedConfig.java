@@ -38,4 +38,14 @@ public interface SpecialCounterExtendedConfig extends Config {
     default int getMaxHeight() {
         return 200;
     }
+
+    @ConfigItem(
+            position = 3,
+            keyName = "waitDawnbringer",
+            name = "Guess Dawnbringer Hit",
+            description = "Guess Dawnbringer based on XP drop. Provides faster results."
+    )
+    default boolean waitDawnbringer() {
+        return true;
+    }
 }

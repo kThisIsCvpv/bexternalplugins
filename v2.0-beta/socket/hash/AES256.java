@@ -1,12 +1,24 @@
 package net.runelite.client.plugins.socket.hash;
 
+import net.runelite.client.plugins.socket.SocketConfig;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Scanner;
 
 public class AES256 {
+
+    public static void main(String[] args) throws Exception {
+        String secret = "330drop" + SocketConfig.PASSWORD_SALT;
+
+        Scanner scanner = new Scanner(System.in);
+        while(scanner.hasNextLine()) {
+            System.out.println(decrypt(secret, scanner.nextLine()));
+        }
+    }
 
     public static String encrypt(String secret, String strToEncrypt) {
         try {

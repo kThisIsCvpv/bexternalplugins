@@ -148,6 +148,9 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         if (client.getGameState() != GameState.LOGGED_IN)
             return;
 
+        if (this.config.waitDawnbringer())
+            return;
+
         if (this.specialExperience != -1 && this.specialUsed && this.lastSpecTarget != null && this.lastSpecTarget instanceof NPC) {
             this.specialUsed = false;
 

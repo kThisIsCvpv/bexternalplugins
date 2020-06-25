@@ -49,6 +49,7 @@ import net.runelite.client.plugins.socket.plugins.playerstatus.marker.AbstractMa
 import net.runelite.client.plugins.socket.plugins.playerstatus.marker.IndicatorMarker;
 import net.runelite.client.plugins.socket.plugins.playerstatus.marker.TimerMarker;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -295,7 +296,7 @@ public class PlayerStatusPlugin extends Plugin {
                 break;
         }
 
-        removeGameTimer(timer);
+        removeGameTimer(timer, name);
 
         synchronized (this.statusEffects) {
             List<AbstractMarker> activeEffects = this.statusEffects.get(name);
@@ -366,7 +367,7 @@ public class PlayerStatusPlugin extends Plugin {
                 break;
         }
 
-        removeGameIndicator(gameIndicator);
+        removeGameIndicator(gameIndicator, name);
 
         synchronized (this.statusEffects) {
             List<AbstractMarker> activeEffects = this.statusEffects.get(name);
@@ -414,6 +415,7 @@ public class PlayerStatusPlugin extends Plugin {
     public void onSocketReceivePacket(SocketReceivePacket event) {
         try {
             JSONObject payload = event.getPayload();
+            System.out.println(payload.toString(4));
             String localName = this.client.getLocalPlayer().getName();
 
             if (payload.has("player-status-game-add")) {

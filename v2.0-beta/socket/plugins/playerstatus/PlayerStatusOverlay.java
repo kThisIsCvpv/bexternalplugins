@@ -82,7 +82,7 @@ public class PlayerStatusOverlay extends Overlay {
 
         int size = this.config.getIndicatorSize();
         int margin = this.config.getIndicatorPadding();
-        graphics.setFont(new Font("SansSerif", Font.BOLD, size));
+        graphics.setFont(new Font("SansSerif", Font.BOLD, (int) (0.75d * size)));
 
         Point base = Perspective.localToCanvas(this.client, p.getLocalLocation(), this.client.getPlane(), p.getLogicalHeight());
         int zOffset = 0;
@@ -104,7 +104,11 @@ public class PlayerStatusOverlay extends Overlay {
                     zOffset += size;
 
                     int xDelta = icon.getWidth() + margin; // +5 for padding
-                    String text = String.format("%.1f", timeRemaining / 1000);
+                    String text;
+                    if (timeRemaining > (100 * 1000))
+                        text = String.format("%d", (long) (timeRemaining / 1000));
+                    else
+                        text = String.format("%.1f", timeRemaining / 1000);
 
                     graphics.setColor(Color.BLACK);
                     graphics.drawString(text, base.getX() + xOffset + xDelta + 1, base.getY() + zOffset);
@@ -153,11 +157,11 @@ public class PlayerStatusOverlay extends Overlay {
                 List<AbstractMarker> toRemove = this.renderPlayer(graphics, t, markers);
 
                 if (!toRemove.isEmpty()) {
-                    synchronized (effects) {
+                    synchronized (markers) {
                         for (AbstractMarker marker : toRemove)
-                            localMarkers.remove(marker);
+                            markers.remove(marker);
 
-                        if (localMarkers.isEmpty())
+                        if (markers.isEmpty())
                             effects.remove(t.getName());
                     }
                 }
