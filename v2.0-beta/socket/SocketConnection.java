@@ -55,6 +55,8 @@ public class SocketConnection implements Runnable {
     @Getter(AccessLevel.PUBLIC)
     private PrintWriter outputStream;
 
+    private long lastHeartbeat;
+
     public SocketConnection(SocketPlugin plugin, String playerName) {
         this.plugin = plugin;
         this.config = this.plugin.getConfig();
@@ -65,6 +67,7 @@ public class SocketConnection implements Runnable {
         this.eventBus = this.plugin.getEventBus();
 
         this.playerName = playerName;
+        this.lastHeartbeat = 0L;
 
         this.state = SocketState.DISCONNECTED;
     }
@@ -106,8 +109,12 @@ public class SocketConnection implements Runnable {
                     throw new IOException("Broken transmission stream");
 
                 if (!this.inputStream.ready()) { // If there is no data ready, ping the server.
-                    synchronized (this.outputStream) {
-                        this.outputStream.println();
+                    long elapsedTime = System.currentTimeMillis() - this.lastHeartbeat;
+                    if (elapsedTime >= 30000) { // Maintain a heartbeat with the server every 30 seconds.
+                        this.lastHeartbeat = System.currentTimeMillis();
+                        synchronized (this.outputStream) {
+                            this.outputStream.println();
+                        }
                     }
 
                     Thread.sleep(20L);
