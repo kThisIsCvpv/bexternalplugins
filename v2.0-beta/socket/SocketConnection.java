@@ -110,7 +110,7 @@ public class SocketConnection implements Runnable {
                         this.outputStream.println();
                     }
 
-                    Thread.sleep(200L);
+                    Thread.sleep(20L);
                     continue;
                 }
 

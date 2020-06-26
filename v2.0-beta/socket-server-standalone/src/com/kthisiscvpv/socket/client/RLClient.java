@@ -1,6 +1,7 @@
 package com.kthisiscvpv.socket.client;
 
 import static com.kthisiscvpv.socket.server.RLServer.MAX_ROOM_NAME_LENGTH;
+import static com.kthisiscvpv.socket.server.RLServerDoctor.DEADLOCK_TIME;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,6 +48,9 @@ public class RLClient implements Runnable {
 	// Variable that checks whether or not terminate() has been called.
 	private boolean isTerminated;
 
+	// Last heartbeat time, decides when to send.
+	private long heartbeatTime;
+
 	/**
 	 * Identify a new client connection.
 	 * @param server The server that accepted the connection.
@@ -59,6 +63,7 @@ public class RLClient implements Runnable {
 		this.socket = socket;
 
 		this.lastHeartbeat = System.currentTimeMillis();
+		this.heartbeatTime = 0L;
 		this.address = this.socket.getInetAddress().getHostAddress();
 
 		this.isTerminated = false;
@@ -87,8 +92,13 @@ public class RLClient implements Runnable {
 					throw new IOException("Broken transmission stream detected");
 
 				if (!this.inputStream.ready()) {
-					this.outputStream.println();
-					Thread.sleep(200L);
+					long elapsedHeartbeat = System.currentTimeMillis() - this.heartbeatTime;
+					if (elapsedHeartbeat >= (DEADLOCK_TIME / 2)) {
+						this.outputStream.println();
+						this.heartbeatTime = System.currentTimeMillis();
+					}
+					
+					Thread.sleep(5L);
 					continue;
 				}
 

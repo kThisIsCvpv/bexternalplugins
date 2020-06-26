@@ -10,7 +10,7 @@ import com.kthisiscvpv.socket.server.RLServer;
 
 public class App {
 
-	private static int DEFAULT_SERVER_PORT = 26318;
+	private static int DEFAULT_SERVER_PORT = 26388;
 
 	public static void main(String[] args) throws Exception {
 		int serverPort = DEFAULT_SERVER_PORT;
