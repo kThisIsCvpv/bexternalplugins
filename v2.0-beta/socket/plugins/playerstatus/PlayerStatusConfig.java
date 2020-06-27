@@ -4,7 +4,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("Socket Player Status Config")
+@ConfigGroup("Socket Player Status Config v2")
 public interface PlayerStatusConfig extends Config {
 
     @ConfigItem(
@@ -44,7 +44,7 @@ public interface PlayerStatusConfig extends Config {
             description = "Show players who have vengeance on cooldown."
     )
     default boolean showVengeanceCooldown() {
-        return true;
+        return false;
     }
 
     @ConfigItem(
@@ -54,7 +54,7 @@ public interface PlayerStatusConfig extends Config {
             description = "Show players with an active vengeance."
     )
     default boolean showVengeanceActive() {
-        return true;
+        return false;
     }
 
     @ConfigItem(
@@ -94,6 +94,56 @@ public interface PlayerStatusConfig extends Config {
             description = "Show players who invigorated their imbued heart."
     )
     default boolean showImbuedHeart() {
+        return false;
+    }
+
+    @ConfigItem(
+            position = 9,
+            keyName = "getStatsRefreshRate",
+            name = "Stats Refresh Rate",
+            description = "The amount of ticks to wait in-between each stat request. I wouldn't touch this variable."
+    )
+    default int getStatsRefreshRate() {
+        return 3;
+    }
+
+    @ConfigItem(
+            position = 10,
+            keyName = "showPlayerHealth",
+            name = "Show Team Health",
+            description = "Show player's health level."
+    )
+    default boolean showPlayerHealth() {
+        return true;
+    }
+
+    @ConfigItem(
+            position = 11,
+            keyName = "showPlayerPrayer",
+            name = "Show Team Prayer",
+            description = "Show player's prayer level."
+    )
+    default boolean showPlayerPrayer() {
+        return false;
+    }
+
+    @ConfigItem(
+            position = 12,
+            keyName = "showPlayerRunEnergy",
+            name = "Show Team Run Energy",
+            description = "Show player's run energy level."
+    )
+    default boolean showPlayerRunEnergy() {
+        return false;
+    }
+
+    @ConfigItem(
+            position = 13,
+            keyName = "showPlayerSpecial",
+            name = "Show Team Special",
+            description = "Show player's special attack bar level."
+    )
+    default boolean showPlayerSpecial() {
         return false;
     }
 }

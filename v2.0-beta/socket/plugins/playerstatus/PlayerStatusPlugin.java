@@ -30,7 +30,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -49,7 +48,6 @@ import net.runelite.client.plugins.socket.plugins.playerstatus.marker.AbstractMa
 import net.runelite.client.plugins.socket.plugins.playerstatus.marker.IndicatorMarker;
 import net.runelite.client.plugins.socket.plugins.playerstatus.marker.TimerMarker;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -62,7 +60,7 @@ import static net.runelite.client.plugins.socket.plugins.playerstatus.gametimer.
         name = "Socket - Player Status",
         description = "Socket extension for displaying player status to members in your party.",
         tags = {"socket", "server", "discord", "connection", "broadcast", "player", "status", "venge", "vengeance"},
-        enabledByDefault = false
+        enabledByDefault = true
 )
 @Slf4j
 public class PlayerStatusPlugin extends Plugin {
@@ -86,6 +84,9 @@ public class PlayerStatusPlugin extends Plugin {
     private PlayerStatusOverlay overlay;
 
     @Inject
+    private PlayerSidebarOverlay sidebar;
+
+    @Inject
     private PlayerStatusConfig config;
 
     @Provides
@@ -96,29 +97,35 @@ public class PlayerStatusPlugin extends Plugin {
     @Getter(AccessLevel.PUBLIC)
     private Map<String, List<AbstractMarker>> statusEffects = new HashMap<String, List<AbstractMarker>>();
 
+    @Getter(AccessLevel.PUBLIC)
+    private Map<String, PlayerStatus> partyStatus = new TreeMap<String, PlayerStatus>();
+
     private int lastRaidVarb;
-    private int lastWildernessVarb;
     private int lastVengCooldownVarb;
     private int lastIsVengeancedVarb;
-    private WorldPoint lastPoint;
-    private int lastAnimation;
+    private int lastRefresh;
 
     @Override
     protected void startUp() {
-        this.overlayManager.add(this.overlay);
-
-        lastRaidVarb = -1;
-        lastPoint = null;
-        lastAnimation = -1;
+        this.lastRaidVarb = -1;
+        this.lastRefresh = 0;
 
         synchronized (this.statusEffects) {
             this.statusEffects.clear();
         }
+
+        synchronized (this.partyStatus) {
+            this.partyStatus.clear();
+        }
+
+        this.overlayManager.add(this.overlay);
+        this.overlayManager.add(this.sidebar);
     }
 
     @Override
     protected void shutDown() {
         this.overlayManager.remove(this.overlay);
+        this.overlayManager.remove(this.sidebar);
     }
 
     @Subscribe
@@ -241,8 +248,12 @@ public class PlayerStatusPlugin extends Plugin {
             case LOGIN_SCREEN_AUTHENTICATOR: {
                 synchronized (this.statusEffects) { // Remove all party member trackers after you log out.
                     for (String s : new ArrayList<String>(this.statusEffects.keySet()))
-                        if (s != null)
+                        if (s != null) // s == null is local player, so we ignore
                             this.statusEffects.remove(s);
+                }
+
+                synchronized (this.partyStatus) {
+                    this.partyStatus.clear();
                 }
 
                 break;
@@ -250,6 +261,46 @@ public class PlayerStatusPlugin extends Plugin {
 
             default:
                 break;
+        }
+    }
+
+    @Subscribe
+    public void onGameTick(GameTick event) {
+        if (this.client.getGameState() != GameState.LOGGED_IN)
+            return;
+
+        int currentHealth = client.getBoostedSkillLevel(Skill.HITPOINTS);
+        int currentPrayer = client.getBoostedSkillLevel(Skill.PRAYER);
+        int maxHealth = client.getRealSkillLevel(Skill.HITPOINTS);
+        int maxPrayer = client.getRealSkillLevel(Skill.PRAYER);
+        int specialAttack = this.client.getVar(VarPlayer.SPECIAL_ATTACK_PERCENT) / 10; // This variable is in [0, 1000]. So we divide by 10.
+        int runEnergy = this.client.getEnergy();
+
+        String name = this.client.getLocalPlayer().getName();
+
+        PlayerStatus status;
+        synchronized (this.partyStatus) {
+            status = this.partyStatus.get(name);
+            if (status == null) {
+                status = new PlayerStatus(currentHealth, maxHealth, currentPrayer, maxPrayer, runEnergy, specialAttack);
+                this.partyStatus.put(name, status);
+            } else {
+                status.setHealth(currentHealth);
+                status.setMaxHealth(maxHealth);
+                status.setPrayer(currentPrayer);
+                status.setMaxPrayer(maxPrayer);
+                status.setRun(runEnergy);
+                status.setSpecial(specialAttack);
+            }
+        }
+
+        this.lastRefresh++;
+        if (this.lastRefresh >= Math.max(1, this.config.getStatsRefreshRate())) {
+            JSONObject packet = new JSONObject();
+            packet.put("name", name);
+            packet.put("player-stats", status.toJSON());
+            this.eventBus.post(new SocketBroadcastPacket(packet));
+            this.lastRefresh = 0;
         }
     }
 
@@ -417,7 +468,24 @@ public class PlayerStatusPlugin extends Plugin {
             JSONObject payload = event.getPayload();
             String localName = this.client.getLocalPlayer().getName();
 
-            if (payload.has("player-status-game-add")) {
+            if (payload.has("player-stats")) {
+                String targetName = payload.getString("name");
+                if (targetName.equals(localName))
+                    return;
+
+                JSONObject statusJson = payload.getJSONObject("player-stats");
+
+                PlayerStatus status;
+                synchronized (this.partyStatus) {
+                    status = this.partyStatus.get(targetName);
+                    if (status == null) {
+                        status = PlayerStatus.fromJSON(statusJson);
+                        this.partyStatus.put(targetName, status);
+                    } else
+                        status.parseJSON(statusJson);
+                }
+
+            } else if (payload.has("player-status-game-add")) {
                 String targetName = payload.getString("player-status-game-add");
                 if (targetName.equals(localName))
                     return;
@@ -460,9 +528,17 @@ public class PlayerStatusPlugin extends Plugin {
 
     @Subscribe
     public void onSocketPlayerLeave(SocketPlayerLeave event) {
-        if (this.statusEffects.containsKey(event.getPlayerName())) {
-            synchronized (this.statusEffects) {
-                this.statusEffects.remove(event.getPlayerName());
+        String target = event.getPlayerName();
+
+        synchronized (this.statusEffects) {
+            if (this.statusEffects.containsKey(target)) {
+                this.statusEffects.remove(target);
+            }
+        }
+
+        synchronized (this.partyStatus) {
+            if (this.partyStatus.containsKey(target)) {
+                this.partyStatus.remove(target);
             }
         }
     }

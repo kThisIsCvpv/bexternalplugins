@@ -1,9 +1,9 @@
 package net.runelite.client.plugins.socket.plugins.playerstatus;
 
+import net.runelite.api.Client;
+import net.runelite.api.Perspective;
+import net.runelite.api.Player;
 import net.runelite.api.Point;
-import net.runelite.api.*;
-import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.plugins.socket.plugins.playerstatus.gametimer.GameIndicator;
@@ -11,13 +11,16 @@ import net.runelite.client.plugins.socket.plugins.playerstatus.gametimer.GameTim
 import net.runelite.client.plugins.socket.plugins.playerstatus.marker.AbstractMarker;
 import net.runelite.client.plugins.socket.plugins.playerstatus.marker.IndicatorMarker;
 import net.runelite.client.plugins.socket.plugins.playerstatus.marker.TimerMarker;
-import net.runelite.client.ui.overlay.*;
+import net.runelite.client.ui.overlay.Overlay;
+import net.runelite.client.ui.overlay.OverlayLayer;
+import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.OverlayPriority;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerStatusOverlay extends Overlay {

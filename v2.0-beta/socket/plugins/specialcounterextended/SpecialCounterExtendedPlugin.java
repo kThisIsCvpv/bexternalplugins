@@ -148,7 +148,7 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         if (client.getGameState() != GameState.LOGGED_IN)
             return;
 
-        if (this.config.waitDawnbringer())
+        if (!this.config.guessDawnbringer()) // They want to wait for the Hitsplat instead.
             return;
 
         if (this.specialExperience != -1 && this.specialUsed && this.lastSpecTarget != null && this.lastSpecTarget instanceof NPC) {
@@ -163,6 +163,7 @@ public class SpecialCounterExtendedPlugin extends Plugin {
             if (this.specialWeapon != null && this.specialWeapon == SpecialWeapon.DAWNBRINGER) {
                 int currentAttackStyleVarbit = client.getVar(VarPlayer.ATTACK_STYLE);
 
+                // This formula causes a 1-off error (sometimes) as exp is a float on Jagex's servers.
                 int damage;
                 if (currentAttackStyleVarbit == 3) { // Defensive Casting
                     damage = (int) Math.round(((double) deltaMagicExp) / 1.4d);
