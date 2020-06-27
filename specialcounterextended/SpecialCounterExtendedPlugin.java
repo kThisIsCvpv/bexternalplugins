@@ -11,7 +11,6 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.NPC;
-import net.runelite.api.Player;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -19,7 +18,6 @@ import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.InteractingChanged;
 import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.VarbitChanged;
-import net.runelite.api.kit.KitType;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -27,11 +25,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.socket.org.json.JSONObject;
-import net.runelite.client.plugins.socket.packet.SocketBroadcastPacket;
-import net.runelite.client.plugins.socket.packet.SocketReceivePacket;
-import net.runelite.client.plugins.sotetseg.SotetsegConfig;
-import net.runelite.client.plugins.sotetseg.SotetsegOverlay;
+import net.runelite.client.plugins.socket.socket.CWSClient;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 
@@ -44,11 +38,13 @@ import java.util.Set;
 @PluginDescriptor(
         name = "Special Attack Counter (Extended)",
         description = "Track DWH, Arclight, Darklight, and BGS special attacks used on NPCs using server sockets.",
-        tags = {"socket", "server", "discord", "connection", "broadcast", "combat", "npcs", "overlay"},
-        enabledByDefault = true
+        tags = {"socket", "server", "discord", "connection", "broadcast", "combat", "npcs", "overlay"}
 )
 @Slf4j
 public class SpecialCounterExtendedPlugin extends Plugin {
+
+    @Inject
+    private CWSClient cwsClient;
 
     @Inject
     private Client client;
@@ -91,12 +87,14 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         specialExperience = -1;
 
         this.overlayManager.add(this.overlay);
+        cwsClient.registerMessage(SpecialAttackMessage.class);
     }
 
     @Override
     protected void shutDown() {
         removeCounters();
         this.overlayManager.remove(this.overlay);
+        cwsClient.unregisterMessage(SpecialAttackMessage.class);
     }
 
     private int currentWorld;
@@ -170,17 +168,14 @@ public class SpecialCounterExtendedPlugin extends Plugin {
                 int damage = (int) (((double) deltaExp) / 3.5d);
 
                 String pName = this.client.getLocalPlayer().getName();
-                updateCounter(pName, this.specialWeapon, null, damage);
+                updateCounter(this.specialWeapon, null, damage);
+                BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
+                overlay.addOverlay(pName, new SpecialIcon(image, Integer.toString(damage), System.currentTimeMillis()));
 
-                JSONObject data = new JSONObject();
-                data.put("player", pName);
-                data.put("target", ((NPC) this.lastSpecTarget).getId());
-                data.put("weapon", specialWeapon.ordinal());
-                data.put("hit", damage);
+                SpecialAttackMessage specialAttackMessage = new SpecialAttackMessage(pName,
+                        ((NPC) lastSpecTarget).getId(), specialWeapon.ordinal(), damage);
 
-                JSONObject payload = new JSONObject();
-                payload.put("special-extended", data);
-                eventBus.post(new SocketBroadcastPacket(payload));
+                cwsClient.sendEndToEndEncrypted(specialAttackMessage);
 
                 this.lastSpecTarget = null;
             }
@@ -225,41 +220,44 @@ public class SpecialCounterExtendedPlugin extends Plugin {
             log.debug("Special attack target: id: {} - target: {} - weapon: {} - amount: {}", interactingId, target, specialWeapon, hit);
 
             final String pName = this.client.getLocalPlayer().getName();
-            updateCounter(pName, specialWeapon, null, hit);
+            updateCounter(specialWeapon, null, hit);
+            BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
+            overlay.addOverlay(pName, new SpecialIcon(image, Integer.toString(hit), System.currentTimeMillis()));
 
-            JSONObject data = new JSONObject();
-            data.put("player", pName);
-            data.put("target", interactingId);
-            data.put("weapon", specialWeapon.ordinal());
-            data.put("hit", hit);
+            SpecialAttackMessage specialAttackMessage = new SpecialAttackMessage(pName,
+                    interactingId, specialWeapon.ordinal(), hit);
 
-            JSONObject payload = new JSONObject();
-            payload.put("special-extended", data);
-            eventBus.post(new SocketBroadcastPacket(payload));
+            cwsClient.sendEndToEndEncrypted(specialAttackMessage);
         }
     }
 
     @Subscribe
-    public void onSocketReceivePacket(SocketReceivePacket event) {
-        try {
-            JSONObject payload = event.getPayload();
-            if (!payload.has("special-extended"))
-                return;
-
-            final String pName = this.client.getLocalPlayer().getName();
-
-            final JSONObject data = payload.getJSONObject("special-extended");
-            if (data.getString("player").equals(pName))
-                return; // We ignore self.
-
-            clientThread.invoke(() -> {
-                SpecialWeapon weapon = SpecialWeapon.values()[data.getInt("weapon")];
-                String attacker = data.getString("player");
-                updateCounter(attacker, weapon, attacker, data.getInt("hit"));
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void onSpecialAttackMessage(SpecialAttackMessage specialAttackMessage)
+    {
+        final String pName = client.getLocalPlayer().getName();
+        if (pName.equals(specialAttackMessage.getPlayer()))
+        {
+            return;
         }
+        clientThread.invoke(() -> {
+            SpecialWeapon weapon = SpecialWeapon.values()[specialAttackMessage.getWeapon()];
+            String attacker = specialAttackMessage.getPlayer();
+
+            // If not interacting with any npcs currently, add to interacting list
+            if (interactedNpcIds.isEmpty())
+            {
+                addInteracting(specialAttackMessage.getTarget());
+            }
+
+            // Otherwise we only add the count if it is against a npc we are already tracking
+            if (interactedNpcIds.contains(specialAttackMessage.getTarget()))
+            {
+                updateCounter(weapon, attacker, specialAttackMessage.getHit());
+            }
+
+            BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
+            overlay.addOverlay(attacker, new SpecialIcon(image, Integer.toString(specialAttackMessage.getHit()), System.currentTimeMillis()));
+        });
     }
 
     private void addInteracting(int npcId) {
@@ -296,12 +294,10 @@ public class SpecialCounterExtendedPlugin extends Plugin {
         return null;
     }
 
-    private void updateCounter(String player, SpecialWeapon specialWeapon, String name, int hit) {
+    private void updateCounter(SpecialWeapon specialWeapon, String name, int hit) {
         SpecialCounter counter = specialCounter[specialWeapon.ordinal()];
 
         BufferedImage image = itemManager.getImage(specialWeapon.getItemID());
-//        this.overlay.addOverlay(player, new SpecialIcon(image, specialWeapon.isDamage() ? Integer.toString(hit) : null, System.currentTimeMillis()));
-        this.overlay.addOverlay(player, new SpecialIcon(image, Integer.toString(hit), System.currentTimeMillis()));
 
         if (counter == null) {
             counter = new SpecialCounter(image, this,

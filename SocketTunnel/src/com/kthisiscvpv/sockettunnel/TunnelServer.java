@@ -1,143 +1,162 @@
 package com.kthisiscvpv.sockettunnel;
 
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.gson.Gson;
+import com.kthisiscvpv.sockettunnel.messages.ClientMessage;
+import com.kthisiscvpv.sockettunnel.messages.ClientsocketMessage;
+import com.kthisiscvpv.sockettunnel.messages.server.Join;
+import com.kthisiscvpv.sockettunnel.messages.server.Leave;
+import com.kthisiscvpv.sockettunnel.messages.ServerMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class TunnelServer implements Runnable {
+@Slf4j
+public class TunnelServer extends WebSocketServer
+{
+	private final Gson gson = ClientsocketGsonFactory.build();
+	private final ConcurrentHashMap<Object, HashSet<WebSocket>> roomClient = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<WebSocket, Client> clients = new ConcurrentHashMap<>();
 
-	public static final int SERVER_PORT = 25340;
-	private Map<Integer, HashSet<TunnelClient>> connections;
-
-	private Thread heartbeat;
-
-	public TunnelServer() {
-		this.connections = new HashMap<Integer, HashSet<TunnelClient>>();
-		this.heartbeat = new Thread(this);
+	public TunnelServer(int port)
+	{
+		super(new InetSocketAddress(port));
 	}
 
 	@Override
-	public void run() {
-		while (true) {
-			List<TunnelClient> terminated = new ArrayList<TunnelClient>();
-			int count = 0;
+	public void onOpen(WebSocket conn, ClientHandshake handshake)
+	{
+		log.debug("{} has connected", conn.getRemoteSocketAddress().getAddress().getHostAddress());
+	}
 
-			synchronized (this.connections) {
-				for (Integer key : this.connections.keySet()) {
-					for (TunnelClient client : this.connections.get(key)) {
-						try {
-							if (client.getOutputStream() != null) {
-								client.getOutputStream().println("Server heartbeat: " + System.currentTimeMillis());
-								count++;
-							}
-						} catch (Exception e) {
-							terminated.add(client);
-							e.printStackTrace();
-						}
-					}
+	private void removeClient(WebSocket conn)
+	{
+		Client client = clients.get(conn);
+		if (client != null)
+		{
+			Object room = client.getRoom();
+			if (room != null)
+			{
+				HashSet<WebSocket> clients = roomClient.get(room);
+				if (clients != null)
+				{
+					clients.remove(conn);
 				}
 			}
+		}
+		this.clients.remove(conn);
+	}
 
-			try {
-				for (TunnelClient client : terminated)
-					client.closeConnection();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+	private void addClient(WebSocket conn, Client client)
+	{
+		clients.put(conn, client);
+		HashSet<WebSocket> clients = roomClient.getOrDefault(client.getRoom(), new HashSet<>());
+		clients.add(conn);
+		roomClient.put(client.getRoom(), clients);
+	}
 
-			System.out.println("--- Heartbeat " + System.currentTimeMillis() + " ---");
-			System.out.println("Sent heartbeat to " + count + " connections.");
-			System.out.println("Terminated " + terminated.size() + " connections.");
+	@Override
+	public void onClose(WebSocket conn, int code, String reason, boolean remote)
+	{
+		Client client = clients.get(conn);
+		if (client != null)
+		{
+			removeClient(conn);
+			sendToRoom(client.getRoom(), gson.toJson(new ServerMessage(gson.toJson(new Leave(client.getName()), ClientsocketMessage.class))));
 
-			try {
-				Thread.sleep(60 * 1000L);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			log.debug("{} has disconnected", client.getName());
+		}
+		else
+		{
+			log.debug("{} has disconnected", conn);
+		}
+	}
+
+
+	private void sendToRoom(WebSocket conn, String message)
+	{
+		Client client = clients.get(conn);
+		if (client != null)
+		{
+			Object room = client.getRoom();
+			if (room != null)
+			{
+				sendToRoom(room, message);
 			}
 		}
 	}
 
-	public void start() {
-		this.heartbeat.start();
+	private void sendToRoom(Object room, String message)
+	{
+		HashSet<WebSocket> clients = roomClient.get(room);
+		if (clients != null)
+		{
+			clients.forEach(client -> client.send(message));
+		}
+	}
 
-		try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
-			System.out.println("Listening on server port " + SERVER_PORT + "...");
-			while (true) {
-				try {
-					Socket clientSocket = serverSocket.accept();
-					TunnelClient tunnel = new TunnelClient(this, clientSocket);
-					tunnel.listen();
-				} catch (Exception ex) {
-					System.err.println("Warning: an error occured while trying to accept a client connection");
-					ex.printStackTrace();
+	@Override
+	public void onMessage(WebSocket conn, String message)
+	{
+		ClientsocketMessage _message = gson.fromJson(message, ClientsocketMessage.class);
+
+		if (_message instanceof ServerMessage)
+		{
+			log.debug("Received from {} : {}", conn.getRemoteSocketAddress().getAddress().getHostAddress(), ((ServerMessage) _message).getMessage());
+			ClientsocketMessage serverMessage = gson.fromJson(((ServerMessage) _message).getMessage(), ClientsocketMessage.class);
+			if (serverMessage instanceof Join)
+			{
+				Join join = (Join) serverMessage;
+				Object room = join.getRoom();
+				if (clients.containsKey(conn))
+				{
+					removeClient(conn);
 				}
-			}
-		} catch (Exception e) {
-			System.err.println("Fatal: unable to start the server");
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
-
-	public void join(int room, TunnelClient client) {
-		this.purge(client);
-
-		synchronized (this.connections) {
-			HashSet<TunnelClient> clients = new HashSet<TunnelClient>();
-			Integer key = (Integer) room;
-			if (this.connections.containsKey(key))
-				clients = this.connections.get(key);
-
-			clients.add(client);
-			this.connections.put(key, clients);
-		}
-	}
-
-	public void purge(TunnelClient client) {
-		synchronized (this.connections) {
-			List<Integer> toRemove = new ArrayList<Integer>();
-
-			for (Integer key : this.connections.keySet()) {
-				HashSet<TunnelClient> clients = this.connections.get(key);
-				if (clients.contains(client))
-					clients.remove(client);
-				if (clients.isEmpty())
-					toRemove.add(key);
-			}
-
-			for (Integer key : toRemove)
-				this.connections.remove(key);
-		}
-
-		System.gc();
-	}
-
-	public void broadcast(int room, String payload) {
-		synchronized (this.connections) {
-			Integer key = (Integer) room;
-			if (this.connections.containsKey(key)) {
-				HashSet<TunnelClient> clients = this.connections.get(key);
-				int count = 0;
-				for (TunnelClient client : clients)
-					try {
-						if (client.isValid()) {
-							client.getOutputStream().println(payload.toString());
-							count++;
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				System.out.println("Broadcasting to " + count + " different clients...");
+				addClient(conn, new Client(join.getName(), join.getRoom()));
+				sendToRoom(room, gson.toJson(new ServerMessage(gson.toJson(new Join(room, join.getName()), ClientsocketMessage.class)), ClientsocketMessage.class));
 			}
 		}
+		else if (_message instanceof ClientMessage)
+		{
+			log.debug("broadcasting message from {}", conn.getRemoteSocketAddress().getAddress().getHostAddress());
+			sendToRoom(conn, message);
+		}
 	}
 
-	public static void main(String[] args) {
-		TunnelServer server = new TunnelServer();
-		server.start();
+	public static void main(String[] args) throws InterruptedException, IOException
+	{
+		int port = 25340;
+		try
+		{
+			port = Integer.parseInt(args[0]);
+		}
+		catch (Exception ignored)
+		{
+		}
+		TunnelServer s = new TunnelServer(port);
+		s.start();
+		log.info("ChatServer started on port: " + s.getPort());
+	}
+
+	@Override
+	public void onError(WebSocket conn, Exception ex)
+	{
+		log.warn("Error in server socket", ex);
+		if (conn != null)
+		{
+			// some errors like port binding failed may not be assignable to a specific websocket
+		}
+	}
+
+	@Override
+	public void onStart()
+	{
+		log.info("Server started!");
+		setConnectionLostTimeout(100);
 	}
 }
