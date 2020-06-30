@@ -1,3 +1,7 @@
+# Out of Date
+
+This container is outdated. The successor of this plugin is in the root folder of the GitHub repository.
+
 # External Plugins for BlueLite
 
 This is my repository for my own plugins for BlueLite.
