@@ -10,8 +10,35 @@ Please direct any inquires there as well, inside the support channel. Feel free 
 
 ## Socket
 
+Socket is a peer-to-peer content sharing plugin that allows other plugins to send and receive data between members in the same party. All socket plugins listed below are included in the single installation file and can be enabled or disabled as necessary.
+
+- **Repository:** [Click Here](./socket)
+- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
+
+### Player Status
+
+Socket plugin extension for displaying player status to members in your party.
+
+- **Repository:** [Click Here](./socket/playerstatus)
+
+### Player Status
+
+Socket plugin extension for Sotetseg in the Theatre of Blood. Send and receive mazes to guarentee the safety of your party.
+
+- **Repository:** [Click Here](./socket/sotetseg)
+
+### Player Status
+
+Socket plugin extension for special attack counting. Track DWH, Arclight, Darklight, and BGS special attacks used on NPCs and share with those in the same party.
+
+- **Repository:** [Click Here](./socket/specialcounterextended)
+
 ## Socket Server
 
+Socket server is the middleman for socket plugins. Individuals using the socket plugin must establish a connection to a common socket server in order to broadcast data to amongst each other.
+
+- **Repository:** [Click Here](./socket-server-standalone)
+- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
 
 ## UncleLite+ Theatre of Blood
 
@@ -51,5 +78,3 @@ Ever wanted your own Speedrun Record but just aren't good enough? Or maybe you c
 ## OpenOSRS
 
 A version of the socket plugins will most likely be ported to [xKylee's repository on GitHub](https://github.com/xKylee/plugins-release). You can import his repository by following the instructions listed on either his repository markdown or Discord support channel.
-
-![alt text](https://kthisiscvpv.com/FL7Dv958rC7F79ssqY.gif)
