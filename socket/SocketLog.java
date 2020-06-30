@@ -24,44 +24,26 @@
  */
 package net.runelite.client.plugins.socket;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
+/**
+ * Enum message types for broadcasting a message to the user's chatbox.
+ * SocketLog identifies a color prefix to use in each scenario.
+ */
+public enum SocketLog {
 
-import static net.runelite.client.plugins.socket.SocketPlugin.CONFIG_VERSION;
+    INFO("<col=008000>"), ERROR("<col=b4281e>");
 
-import java.util.UUID;
+    private String prefix;
 
-@ConfigGroup(CONFIG_VERSION)
-public interface SocketConfig extends Config {
-
-    @ConfigItem(
-            position = 0,
-            keyName = "getHost",
-            name = "Server Host Address",
-            description = "The host address of the server to connect to."
-    )
-    default String getServerAddress() {
-        return "socket.kthisiscvpv.com";
+    SocketLog(String prefix) {
+        this.prefix = prefix;
     }
 
-    @ConfigItem(
-            position = 1,
-            keyName = "getPort",
-            name = "Server Port Number",
-            description = "The port number of the server to connect to."
-    )
-    default int getServerPort() {
-        return 26388;
-    }
-
-    @ConfigItem(
-            position = 2,
-            keyName = "getPassword",
-            name = "Shared Password",
-            description = "Used to encrypt and decrypt data sent to the server."
-    )
-    default String getPassword() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
+    /**
+     * Retrieves the hex tag to use for the specific message type.
+     *
+     * @return String hex tag.
+     */
+    public String getPrefix() {
+        return this.prefix;
     }
 }

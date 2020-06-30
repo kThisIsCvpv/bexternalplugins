@@ -24,44 +24,17 @@
  */
 package net.runelite.client.plugins.socket;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
+/**
+ * Identify the String headers of each packet broadcast type.
+ */
+public class SocketPacket {
 
-import static net.runelite.client.plugins.socket.SocketPlugin.CONFIG_VERSION;
+    public static final String JOIN = "JOIN";
+    public static final String LEAVE = "LEAVE";
 
-import java.util.UUID;
+    public static final String BROADCAST = "BROADCAST";
+    public static final String PING = "PING";
 
-@ConfigGroup(CONFIG_VERSION)
-public interface SocketConfig extends Config {
+    public static final String MESSAGE = "MESSAGE";
 
-    @ConfigItem(
-            position = 0,
-            keyName = "getHost",
-            name = "Server Host Address",
-            description = "The host address of the server to connect to."
-    )
-    default String getServerAddress() {
-        return "socket.kthisiscvpv.com";
-    }
-
-    @ConfigItem(
-            position = 1,
-            keyName = "getPort",
-            name = "Server Port Number",
-            description = "The port number of the server to connect to."
-    )
-    default int getServerPort() {
-        return 26388;
-    }
-
-    @ConfigItem(
-            position = 2,
-            keyName = "getPassword",
-            name = "Shared Password",
-            description = "Used to encrypt and decrypt data sent to the server."
-    )
-    default String getPassword() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
-    }
 }

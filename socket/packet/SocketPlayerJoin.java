@@ -6,12 +6,13 @@ import lombok.Getter;
 import net.runelite.client.plugins.socket.org.json.JSONObject;
 
 /**
- * Event triggered by alternative plugins, broadcasting a packet to the server.
+ * Event triggered by Socket, notifying plugins that a player has joined the party.
+ * This event is not triggered on the client thread.
  */
 @AllArgsConstructor
-public class SocketBroadcastPacket {
+public class SocketPlayerJoin {
 
     @Getter(AccessLevel.PUBLIC)
-    private JSONObject payload;
+    private String playerName;
 
 }

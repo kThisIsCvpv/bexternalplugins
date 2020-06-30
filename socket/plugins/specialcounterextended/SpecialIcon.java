@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2020, Charles Xu <github.com/kthisiscvpv>
+ * Copyright (c) 2018, Raqes <j.raqes@gmail.com>
+ * Copyright (c) 2020, Charles <github.com/kthisiscvpv>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,46 +23,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.socket;
+package net.runelite.client.plugins.socket.plugins.specialcounterextended;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import static net.runelite.client.plugins.socket.SocketPlugin.CONFIG_VERSION;
+import java.awt.image.BufferedImage;
 
-import java.util.UUID;
+@AllArgsConstructor
+public class SpecialIcon {
 
-@ConfigGroup(CONFIG_VERSION)
-public interface SocketConfig extends Config {
+    @Getter(AccessLevel.PUBLIC)
+    private BufferedImage image;
 
-    @ConfigItem(
-            position = 0,
-            keyName = "getHost",
-            name = "Server Host Address",
-            description = "The host address of the server to connect to."
-    )
-    default String getServerAddress() {
-        return "socket.kthisiscvpv.com";
-    }
+    @Getter(AccessLevel.PUBLIC)
+    private String text;
 
-    @ConfigItem(
-            position = 1,
-            keyName = "getPort",
-            name = "Server Port Number",
-            description = "The port number of the server to connect to."
-    )
-    default int getServerPort() {
-        return 26388;
-    }
+    @Getter(AccessLevel.PUBLIC)
+    private long startTime;
 
-    @ConfigItem(
-            position = 2,
-            keyName = "getPassword",
-            name = "Shared Password",
-            description = "Used to encrypt and decrypt data sent to the server."
-    )
-    default String getPassword() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
-    }
 }
