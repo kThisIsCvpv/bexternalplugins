@@ -19,7 +19,7 @@ Use the following tutorial to set up your own socket server.
 
 ### Via IDE
 
-1. Clone [/socket-server-standalone](./socket-server-standalone)
-2. Navigate to [App.java](./socket-server-standalone/src/com/kthisiscvpv/App.java).
+1. Clone [/socket-server-standalone](./)
+2. Navigate to [App.java](./src/com/kthisiscvpv/App.java).
 3. Execute. Change variables as necessary.
 4. Same as above, follow from Step 5 above to retrieve your IP address.
