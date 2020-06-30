@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Plugin-Version: 2.0.8
+Plugin-Id: socket-plugin
+Plugin-Provider: kThisIsCvpv
+Plugin-Description: Socket connection for broadcasting messages across c
+ lients.
+Plugin-License: 3-Clause BSD License
+

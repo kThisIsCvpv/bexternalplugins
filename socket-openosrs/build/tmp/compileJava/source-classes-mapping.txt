@@ -1,0 +1,104 @@
+net/runelite/client/plugins/socket/plugins/specialcounterextended/Boss.java
+ net.runelite.client.plugins.socket.plugins.specialcounterextended.Boss
+net/runelite/client/plugins/socket/org/json/CDL.java
+ net.runelite.client.plugins.socket.org.json.CDL
+net/runelite/client/plugins/socket/org/json/XMLTokener.java
+ net.runelite.client.plugins.socket.org.json.XMLTokener
+net/runelite/client/plugins/socket/org/json/JSONString.java
+ net.runelite.client.plugins.socket.org.json.JSONString
+net/runelite/client/plugins/socket/org/json/XML.java
+ net.runelite.client.plugins.socket.org.json.XML
+net/runelite/client/plugins/socket/SocketConnection.java
+ net.runelite.client.plugins.socket.SocketConnection
+net/runelite/client/plugins/socket/plugins/playerstatus/gametimer/GameTimer.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.gametimer.GameTimer
+net/runelite/client/plugins/socket/plugins/specialcounterextended/SpecialWeapon.java
+ net.runelite.client.plugins.socket.plugins.specialcounterextended.SpecialWeapon
+net/runelite/client/plugins/socket/packet/SocketPlayerLeave.java
+ net.runelite.client.plugins.socket.packet.SocketPlayerLeave
+net/runelite/client/plugins/socket/plugins/playerstatus/gametimer/GameIndicator.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.gametimer.GameIndicator
+net/runelite/client/plugins/socket/plugins/sotetseg/SotetsegPlugin.java
+ net.runelite.client.plugins.socket.plugins.sotetseg.SotetsegPlugin
+net/runelite/client/plugins/socket/plugins/specialcounterextended/SpecialCounter.java
+ net.runelite.client.plugins.socket.plugins.specialcounterextended.SpecialCounter
+net/runelite/client/plugins/socket/org/json/JSONException.java
+ net.runelite.client.plugins.socket.org.json.JSONException
+net/runelite/client/plugins/socket/plugins/sotetseg/SotetsegConfig.java
+ net.runelite.client.plugins.socket.plugins.sotetseg.SotetsegConfig
+net/runelite/client/plugins/socket/org/json/JSONArray.java
+ net.runelite.client.plugins.socket.org.json.JSONArray
+net/runelite/client/plugins/socket/SocketState.java
+ net.runelite.client.plugins.socket.SocketState
+net/runelite/client/plugins/socket/org/json/JSONML.java
+ net.runelite.client.plugins.socket.org.json.JSONML
+net/runelite/client/plugins/socket/plugins/specialcounterextended/SpecialIcon.java
+ net.runelite.client.plugins.socket.plugins.specialcounterextended.SpecialIcon
+net/runelite/client/plugins/socket/hash/SHA256.java
+ net.runelite.client.plugins.socket.hash.SHA256
+net/runelite/client/plugins/socket/SocketPacket.java
+ net.runelite.client.plugins.socket.SocketPacket
+net/runelite/client/plugins/socket/org/json/JSONWriter.java
+ net.runelite.client.plugins.socket.org.json.JSONWriter
+net/runelite/client/plugins/socket/packet/SocketReceivePacket.java
+ net.runelite.client.plugins.socket.packet.SocketReceivePacket
+net/runelite/client/plugins/socket/SocketPlugin.java
+ net.runelite.client.plugins.socket.SocketPlugin
+net/runelite/client/plugins/socket/hash/AES256.java
+ net.runelite.client.plugins.socket.hash.AES256
+net/runelite/client/plugins/socket/org/json/JSONTokener.java
+ net.runelite.client.plugins.socket.org.json.JSONTokener
+net/runelite/client/plugins/socket/org/json/Property.java
+ net.runelite.client.plugins.socket.org.json.Property
+net/runelite/client/plugins/socket/org/json/HTTP.java
+ net.runelite.client.plugins.socket.org.json.HTTP
+net/runelite/client/plugins/socket/plugins/playerstatus/PlayerStatus.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerStatus
+net/runelite/client/plugins/socket/SocketLog.java
+ net.runelite.client.plugins.socket.SocketLog
+net/runelite/client/plugins/socket/plugins/playerstatus/marker/AbstractMarker.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.marker.AbstractMarker
+net/runelite/client/plugins/socket/plugins/playerstatus/gametimer/GameTimerConstant.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.gametimer.GameTimerConstant
+net/runelite/client/plugins/socket/packet/SocketBroadcastPacket.java
+ net.runelite.client.plugins.socket.packet.SocketBroadcastPacket
+net/runelite/client/plugins/socket/plugins/specialcounterextended/SpecialCounterOverlay.java
+ net.runelite.client.plugins.socket.plugins.specialcounterextended.SpecialCounterOverlay
+net/runelite/client/plugins/socket/org/json/JSONObject.java
+ net.runelite.client.plugins.socket.org.json.JSONObject
+ net.runelite.client.plugins.socket.org.json.JSONObject$Null
+net/runelite/client/plugins/socket/plugins/playerstatus/PlayerStatusConfig.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerStatusConfig
+net/runelite/client/plugins/socket/SocketConfig.java
+ net.runelite.client.plugins.socket.SocketConfig
+net/runelite/client/plugins/socket/org/json/JSONStringer.java
+ net.runelite.client.plugins.socket.org.json.JSONStringer
+net/runelite/client/plugins/socket/plugins/playerstatus/marker/TimerMarker.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.marker.TimerMarker
+net/runelite/client/plugins/socket/org/json/CookieList.java
+ net.runelite.client.plugins.socket.org.json.CookieList
+net/runelite/client/plugins/socket/plugins/playerstatus/marker/IndicatorMarker.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.marker.IndicatorMarker
+net/runelite/client/plugins/socket/plugins/specialcounterextended/SpecialCounterExtendedConfig.java
+ net.runelite.client.plugins.socket.plugins.specialcounterextended.SpecialCounterExtendedConfig
+net/runelite/client/plugins/socket/plugins/sotetseg/SotetsegOverlay.java
+ net.runelite.client.plugins.socket.plugins.sotetseg.SotetsegOverlay
+net/runelite/client/plugins/socket/plugins/specialcounterextended/SpecialCounterExtendedPlugin.java
+ net.runelite.client.plugins.socket.plugins.specialcounterextended.SpecialCounterExtendedPlugin
+net/runelite/client/plugins/socket/org/json/HTTPTokener.java
+ net.runelite.client.plugins.socket.org.json.HTTPTokener
+net/runelite/client/plugins/socket/plugins/playerstatus/PlayerStatusOverlay.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerStatusOverlay
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerStatusOverlay$1
+net/runelite/client/plugins/socket/packet/SocketPlayerJoin.java
+ net.runelite.client.plugins.socket.packet.SocketPlayerJoin
+net/runelite/client/plugins/socket/plugins/playerstatus/gametimer/GameTimerImageType.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.gametimer.GameTimerImageType
+net/runelite/client/plugins/socket/plugins/playerstatus/PlayerStatusPlugin.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerStatusPlugin
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerStatusPlugin$1
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerStatusPlugin$2
+net/runelite/client/plugins/socket/org/json/Cookie.java
+ net.runelite.client.plugins.socket.org.json.Cookie
+net/runelite/client/plugins/socket/plugins/playerstatus/PlayerSidebarOverlay.java
+ net.runelite.client.plugins.socket.plugins.playerstatus.PlayerSidebarOverlay
