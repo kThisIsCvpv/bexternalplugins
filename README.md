@@ -16,17 +16,17 @@ Socket is a peer-to-peer content sharing plugin that allows other plugins to sen
 - **Extended Plugins:** [Click Here](./socket/plugins)
 - **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
 
-### Player Status
-
-Socket plugin extension for displaying player status to members in your party.
-
-### Player Status
+### Sotetseg
 
 Socket plugin extension for Sotetseg in the Theatre of Blood. Send and receive mazes to guarentee the safety of your party.
 
-### Player Status
+### Special Attack Counter
 
 Socket plugin extension for special attack counting. Track DWH, Arclight, Darklight, and BGS special attacks used on NPCs and share with those in the same party.
+
+### Player Status
+
+Socket plugin extension for displaying player status to members in your party.
 
 ## Socket Server
 
