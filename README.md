@@ -19,9 +19,6 @@ Please direct any inquires there as well, inside the support channel. Feel free 
 
 Ever wanted your own Speedrun Record but just aren't good enough? Or maybe you can't find the right team...? Don't worry, UncleLite+ has got your back! Here, we make it easy.
 
-- **Repository:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/tree/master/unclelitetob)
-- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
-
 - **Repository:** [Click Here](./unclelitetob)
 - **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
 
@@ -55,4 +52,4 @@ Ever wanted your own Speedrun Record but just aren't good enough? Or maybe you c
 
 A version of the socket plugins will most likely be ported to [xKylee's repository on GitHub](https://github.com/xKylee/plugins-release). You can import his repository by following the instructions listed on either his repository markdown or Discord support channel.
 
-![alt text](https://i.imgur.com/z7RKHA7.mp4)
+![alt text](https://kthisiscvpv.com/FL7Dv958rC7F79ssqY.gif)
