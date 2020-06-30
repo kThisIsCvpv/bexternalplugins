@@ -14,7 +14,7 @@ Socket is a peer-to-peer content sharing plugin that allows other plugins to sen
 
 - **Repository:** [Click Here](./socket)
 - **Extended Plugins:** [Click Here](./socket/plugins)
-- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
+- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/2.0.7/socket.jar)
 
 ### Sotetseg
 
@@ -30,10 +30,10 @@ Socket plugin extension for displaying player status to members in your party.
 
 ## Socket Server
 
-Socket server is the middleman for socket plugins. Individuals using the socket plugin must establish a connection to a common socket server in order to broadcast data to amongst each other.
+Socket server is the middleman for socket plugins. Individuals using the socket plugin must establish a connection to a common socket server in order to broadcast data to amongst each other. If you do not wish to host your own server and instead use the public one, feel free to ignore this section completely.
 
 - **Repository:** [Click Here](./socket-server-standalone)
-- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
+- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/2.0.7/socket-server-standalone.zip)
 
 ## UncleLite+ Theatre of Blood
 
