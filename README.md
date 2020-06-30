@@ -19,7 +19,7 @@ Please direct any inquires there as well, inside the support channel. Feel free 
 
 Ever wanted your own Speedrun Record but just aren't good enough? Or maybe you can't find the right team...? Don't worry, UncleLite+ has got your back! Here, we make it easy.
 
-- **Repository:** [View Here](https://github.com/kThisIsCvpv/bexternalplugins/tree/master/unclelitetob)
+- **Repository:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/tree/master/unclelitetob)
 - **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/1.0.7/unclelitetob.jar)
 
 # Plugin Installation
