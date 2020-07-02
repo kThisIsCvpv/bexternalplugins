@@ -30,7 +30,7 @@ Use the following tutorial to set up your own socket server.
 
 If you are hosting the server on your own computer, you can test whether or not the server is up by connecting to ``localhost``.
 
-![alt text](https://kthisiscvpv.com/SQWqyDg3A22MpI5eKH.png)
+![alt text](https://kthisiscvpv.com/S79X4GrQnyU7I60J7Y.png)
 
 ### Port Forwarding
 
