@@ -17,7 +17,7 @@ import org.json.JSONObject;
 
 import com.kthisiscvpv.socket.server.RLServer;
 import com.kthisiscvpv.util.logger.AbstractLogger;
-import com.kthisiscvpv.util.logger.MockLogger.Level;
+import com.kthisiscvpv.util.logger.AbstractLogger.Level;
 
 public class RLClient implements Runnable {
 
@@ -80,8 +80,26 @@ public class RLClient implements Runnable {
 				allClients.add(this);
 			}
 
+			// Add to the IP count.
+			Map<String, Integer> activeIPCount = this.server.getActiveCount();
+			int count = 1;
+			synchronized (activeIPCount) {
+				if (activeIPCount.containsKey(this.address))
+					count += activeIPCount.get(this.address);
+				activeIPCount.put(this.address, count);
+			}
+
 			this.inputStream = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 			this.outputStream = new PrintWriter(this.socket.getOutputStream(), true);
+
+			if (this.server.getIPLimit() > 0) {
+				if (count > this.server.getIPLimit()) {
+					this.logger.println(RLClient.class, Level.INFO, "Terminating connection with " + this.address + " as they have exceeded the IP address limit (" + count + " > " + this.server.getIPLimit() + ")");
+					this.errorAndTerminate("<col=b4281e>Connection count exceeded. Maximum of " + this.server.getIPLimit() + " allowed per IP address. Consider hosting your own server to bypass this limit.");
+					this.logger.println(RLClient.class, Level.INFO, "Disconnection error message sent to " + this.address);
+					return;
+				}
+			}
 
 			while (true) {
 				if (this.isTerminated || !this.socket.isConnected() || this.socket.isClosed())
@@ -111,7 +129,11 @@ public class RLClient implements Runnable {
 				}
 
 				long packetParseTime = System.currentTimeMillis();
-				this.logger.println(RLClient.class, Level.INFO, "Recieved packet from " + this.address + ": " + packet);
+
+				if (this.server.isVerbose())
+					this.logger.println(RLClient.class, Level.INFO, "Recieved packet from " + this.address + ": " + packet);
+				else
+					this.logger.println(RLClient.class, Level.INFO, "Recieved packet from " + this.address + " (length=" + packet.length() + ")");
 
 				JSONObject data = new JSONObject(packet);
 
@@ -180,6 +202,22 @@ public class RLClient implements Runnable {
 		this.terminate();
 	}
 
+	public void errorAndTerminate(String message) {
+		try {
+			JSONObject obj = new JSONObject();
+			obj.put("header", Packet.MESSAGE);
+			obj.put("message", message);
+			String packet = obj.toString();
+			this.sendPacket(packet);
+
+			Thread.sleep(5000L);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			this.terminate();
+		}
+	}
+
 	/**
 	 * Close all connections in this socket.
 	 */
@@ -192,7 +230,21 @@ public class RLClient implements Runnable {
 		HashSet<RLClient> allClients = this.server.getConnectedClients();
 		synchronized (allClients) {
 			try {
-				allClients.remove(this);
+				if (allClients.contains(this)) {
+					allClients.remove(this);
+
+					// Remove from the IP count.
+					Map<String, Integer> activeIPCount = this.server.getActiveCount();
+					synchronized (activeIPCount) {
+						if (activeIPCount.containsKey(this.address)) {
+							int count = activeIPCount.get(this.address) - 1;
+							if (count > 0)
+								activeIPCount.put(this.address, count);
+							else
+								activeIPCount.remove(this.address);
+						}
+					}
+				}
 			} catch (Exception ignorred) {}
 		}
 

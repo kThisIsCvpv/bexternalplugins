@@ -1,3 +1,4 @@
 releases/
 .settings/
 target/
+AppTest.java

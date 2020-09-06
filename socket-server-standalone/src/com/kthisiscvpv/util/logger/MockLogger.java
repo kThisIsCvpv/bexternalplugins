@@ -7,10 +7,6 @@ public class MockLogger extends AbstractLogger {
 
 	private static SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	public static enum Level {
-		INFO, WARN, ERROR, FATAL;
-	}
-
 	private PrintStream stream;
 
 	public MockLogger(PrintStream stream) {

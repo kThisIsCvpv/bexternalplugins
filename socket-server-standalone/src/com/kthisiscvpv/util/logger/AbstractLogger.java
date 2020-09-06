@@ -1,8 +1,10 @@
 package com.kthisiscvpv.util.logger;
 
-import com.kthisiscvpv.util.logger.MockLogger.Level;
-
 public abstract class AbstractLogger {
+
+	public static enum Level {
+		INFO, WARN, ERROR, FATAL;
+	}
 
 	public abstract void println(Class<?> c, Level l);
 

@@ -1,5 +1,7 @@
 package com.kthisiscvpv;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.json.JSONObject;
@@ -10,22 +12,38 @@ import com.kthisiscvpv.socket.server.RLServer;
 
 public class App {
 
-	private static int DEFAULT_SERVER_PORT = 26388;
-
 	public static void main(String[] args) throws Exception {
-		int serverPort = DEFAULT_SERVER_PORT;
+		// Parse the arguments into a map.
+		Map<String, String> arguments = new HashMap<String, String>();
 
-		// Check if the user provided a port
-		if (args.length > 0)
-			try {
-				serverPort = Integer.parseInt(args[0]);
-			} catch (Exception e) {
-				System.err.printf("Error: %s is not a valid port number.\n", args[0]);
-				System.exit(1);
+		for (int i = 0; i < args.length; i++) {
+			String var = args[i];
+			if (!var.startsWith("--"))
+				continue;
+			var = var.substring(2);
+			if (var.isEmpty())
+				continue;
+
+			String argument = "";
+
+			for (int j = (i + 1); j < args.length; j++) {
+				String key = args[j];
+				if (key.isEmpty())
+					continue;
+
+				if (key.startsWith("--"))
+					break;
+
+				if (!argument.isEmpty())
+					argument += " ";
+				argument += key;
 			}
 
-		// Start the socket server on the given port
-		RLServer server = new RLServer(serverPort);
+			arguments.put(var, argument.isEmpty() ? null : argument);
+		}
+
+		// Start the socket server on the given arguments
+		RLServer server = new RLServer(arguments);
 		new Thread(server).start();
 
 		// Start debugging through system input

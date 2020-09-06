@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.kthisiscvpv.socket.client.RLClient;
 import com.kthisiscvpv.util.logger.AbstractLogger;
-import com.kthisiscvpv.util.logger.MockLogger.Level;
+import com.kthisiscvpv.util.logger.AbstractLogger.Level;
 
 /**
  * Maintains the integrity of the client list.
@@ -16,12 +16,18 @@ public class RLServerDoctor implements Runnable {
 	// A RLClient is pronounced dead if it hasn't responded within DEADLOCK_TIME milliseconds.
 	public static final long DEADLOCK_TIME = 60000L;
 
+	// Garbage Cleanup Time.
+	public static final long GC_TIME = 60000L;
+
 	private RLServer server;
 	private AbstractLogger logger;
+
+	private long lastCleanup;
 
 	public RLServerDoctor(RLServer server) {
 		this.server = server;
 		this.logger = this.server.getLogger();
+		this.lastCleanup = System.currentTimeMillis();
 	}
 
 	@Override
@@ -40,6 +46,12 @@ public class RLServerDoctor implements Runnable {
 						this.logger.println(RLServerDoctor.class, Level.INFO, client.getAddress() + " has stopped responding after " + elapsedTime + "ms and will be terminated");
 						client.terminate();
 					}
+				}
+
+				if (System.currentTimeMillis() >= (this.lastCleanup + GC_TIME)) {
+					this.logger.println(RLServerDoctor.class, Level.INFO, "Garbage cleanup has been initiated");
+					System.gc();
+					this.lastCleanup = System.currentTimeMillis();
 				}
 
 				Thread.sleep(1000L);
