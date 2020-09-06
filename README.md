@@ -14,7 +14,7 @@ Socket is a peer-to-peer content sharing plugin that allows other plugins to sen
 
 - **Repository:** [Click Here](./socket)
 - **Extended Plugins:** [Click Here](./socket/plugins)
-- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/2.0.7/socket.jar)
+- **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/2.0.8/socket.jar)
 
 ### Sotetseg
 
