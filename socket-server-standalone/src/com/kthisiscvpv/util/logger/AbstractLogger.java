@@ -3,7 +3,18 @@ package com.kthisiscvpv.util.logger;
 public abstract class AbstractLogger {
 
 	public static enum Level {
-		INFO, WARN, ERROR, FATAL;
+
+		SYSTEM(false), INFO(true), WARN(false), ERROR(false), FATAL(false);
+
+		private boolean verbose;
+
+		Level(boolean verbose) {
+			this.verbose = verbose;
+		}
+
+		public boolean isVerbose() {
+			return this.verbose;
+		}
 	}
 
 	public abstract void println(Class<?> c, Level l);

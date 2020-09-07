@@ -1,5 +1,7 @@
 package com.kthisiscvpv.socket.server;
 
+import static com.kthisiscvpv.socket.server.RLConst.DEFAULT_SERVER_PORT;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -7,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import com.kthisiscvpv.socket.client.RLClient;
+import com.kthisiscvpv.util.Utils;
 import com.kthisiscvpv.util.logger.AbstractLogger;
 import com.kthisiscvpv.util.logger.AbstractLogger.Level;
 import com.kthisiscvpv.util.logger.MockFileLogger;
@@ -14,156 +17,115 @@ import com.kthisiscvpv.util.logger.MockLogger;
 
 public class RLServer implements Runnable {
 
-	// Default server port number.
-	private static int DEFAULT_SERVER_PORT = 26388;
-
-	// This is the maximum length of the name of a room.
-	public static int MAX_ROOM_NAME_LENGTH = 64;
-
-	private Map<String, String> arguments;
-
 	private AbstractLogger logger;
-	private int port = DEFAULT_SERVER_PORT;
+	private int port;
 
-	private boolean isVerbose;
+	private HashSet<RLClient> clients;
+	private Map<String, HashSet<RLClient>> rooms;
 
-	private int roomLimit = -1;
-	private int ipLimit = -1;
+	private int roomLimit;
+
+	private int ipLimit;
+	private Map<String, Integer> activeIPAddresses;
+
+	public RLServer(Map<String, String> arguments) {
+		loadLogger(arguments);
+		loadArguments(arguments);
+		
+		this.clients = new HashSet<RLClient>();
+		this.rooms = new HashMap<String, HashSet<RLClient>>();
+		this.activeIPAddresses = new HashMap<String, Integer>();
+	}
+
+	public AbstractLogger getLogger() {
+		return logger;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public HashSet<RLClient> getClients() {
+		return clients;
+	}
+
+	public Map<String, Integer> getClientAddresses() {
+		return activeIPAddresses;
+	}
+
+	public Map<String, HashSet<RLClient>> getRooms() {
+		return rooms;
+	}
 
 	public int getRoomLimit() {
-		return this.roomLimit;
+		return roomLimit;
 	}
 
 	public int getIPLimit() {
-		return this.ipLimit;
+		return ipLimit;
 	}
 
-	// This contains a set of all the active connections on the server.
-	private HashSet<RLClient> connectedClients;
+	private void loadLogger(Map<String, String> arguments) {
+		boolean verbose = arguments.containsKey("verbose");
 
-	// This contains a mapping of all the rooms with the clients.
-	private Map<String, HashSet<RLClient>> activeClients;
-
-	// This contains a mapping of all the IPs with their active connections.
-	private Map<String, Integer> activeIPCount;
-
-	public Map<String, Integer> getActiveCount() {
-		return this.activeIPCount;
-	}
-
-	/**
-	 * Construct a new RuneLite socket server.
-	 * @param port Valid port number (1 - 65565) to start the server on.
-	 */
-	public RLServer(Map<String, String> arguments) {
 		if (arguments.containsKey("logging"))
-			this.logger = new MockFileLogger(System.out);
+			logger = new MockFileLogger(System.out, verbose);
 		else
-			this.logger = new MockLogger(System.out);
+			logger = new MockLogger(System.out, verbose);
 
-		this.arguments = arguments;
-		this.loadArguments();
-
-		this.connectedClients = new HashSet<RLClient>();
-		this.activeClients = new HashMap<String, HashSet<RLClient>>();
-		this.activeIPCount = new HashMap<String, Integer>();
+		logger.println(RLServer.class, Level.SYSTEM, String.format("Logger has been loaded (type=%s, verbose=%s)", logger.getClass().getName(), Boolean.toString(verbose)));
 	}
 
-	private void loadArguments() {
-		this.logger.println(RLServer.class, Level.INFO, "Detected settings as " + this.arguments.toString());
+	private void loadArguments(Map<String, String> arguments) {
+		logger.println(RLServer.class, Level.SYSTEM, "Detected settings as " + arguments.toString());
 
-		this.isVerbose = this.arguments.containsKey("verbose");
-		this.logger.println(RLServer.class, Level.INFO, "Logging verbose is set to " + this.isVerbose);
+		if (arguments.containsKey("port"))
+			port = Utils.parseIntExitIfFail(arguments.get("port"));
+		else
+			port = DEFAULT_SERVER_PORT;
+		logger.println(RLServer.class, Level.SYSTEM, "Server port set to " + port);
 
-		if (this.arguments.containsKey("port"))
-			this.port = this.parseIntExitIfFail(this.arguments.get("port"));
+		if (arguments.containsKey("room-limit"))
+//			roomLimit = Math.max(2, Utils.parseIntExitIfFail(arguments.get("room-limit")));
+			roomLimit = Math.max(1, Utils.parseIntExitIfFail(arguments.get("room-limit")));
+		else
+			roomLimit = -1;
+		logger.println(RLServer.class, Level.SYSTEM, "Maximum amount of people per room set to " + (roomLimit > 0 ? roomLimit : "'undefined'"));
 
-		if (this.arguments.containsKey("room-limit")) // It wouldn't make sense if there were less than 2 people in a room.
-			this.roomLimit = Math.max(2, this.parseIntExitIfFail(this.arguments.get("room-limit")));
-		this.logger.println(RLServer.class, Level.INFO, "Maximum amount of people per room set to " + this.roomLimit);
-
-		if (this.arguments.containsKey("ip-limit")) // It wouldn't make sense if no-one could connect.
-			this.ipLimit = Math.max(1, this.parseIntExitIfFail(this.arguments.get("ip-limit")));
-		this.logger.println(RLServer.class, Level.INFO, "Maximum amount of people per IP address set to " + this.ipLimit);
-	}
-
-	private int parseIntExitIfFail(String s) {
-		if (s == null)
-			s = "null";
-
-		try {
-			return Integer.parseInt(s);
-		} catch (Exception e) {
-			System.err.printf("Error: %s is not a valid integer.\n", s);
-			System.exit(1);
-			return -1;
-		}
-	}
-
-	/**
-	 * Return the debug logger.
-	 * @return The debug logger.
-	 */
-	public AbstractLogger getLogger() {
-		return this.logger;
-	}
-
-	/**
-	 * Retrieve the port number that the server was started on.
-	 * @return The port number of the server.
-	 */
-	public int getPort() {
-		return this.port;
-	}
-
-	/**
-	 * Returns the list of all connected clients.
-	 * @return A hashset of all connected clients.
-	 */
-	public HashSet<RLClient> getConnectedClients() {
-		return this.connectedClients;
-	}
-
-	/**
-	 * Return the room mapping of all connected clients with their respective rooms. A client could be connected and not be in any room yet.
-	 * @return A map of all rooms and their connected clients.
-	 */
-	public Map<String, HashSet<RLClient>> getActiveClients() {
-		return this.activeClients;
-	}
-
-	public boolean isVerbose() {
-		return this.isVerbose;
+		if (arguments.containsKey("ip-limit"))
+			ipLimit = Math.max(1, Utils.parseIntExitIfFail(arguments.get("ip-limit")));
+		else
+			ipLimit = -1;
+		logger.println(RLServer.class, Level.SYSTEM, "Maximum amount of people per IP address set to " + (ipLimit > 0 ? ipLimit : "'undefined'"));
 	}
 
 	@Override
 	public void run() {
 		long startTime = System.currentTimeMillis();
-		this.logger.println(RLServer.class, Level.INFO, "Starting socket server on port " + this.port);
 
 		new Thread(new RLServerDoctor(this)).start();
-		this.logger.println(RLServer.class, Level.INFO, "Starting routine integrity checks");
+		logger.println(RLServer.class, Level.SYSTEM, "Starting routine integrity checks");
 
-		try (ServerSocket serverSocket = new ServerSocket(this.port)) {
-			this.logger.println(RLServer.class, Level.INFO, "Done. Elapsed time: " + (System.currentTimeMillis() - startTime) + "ms");
+		try (ServerSocket server = new ServerSocket(port)) {
+			logger.println(RLServer.class, Level.SYSTEM, "Done. Elapsed time: " + (System.currentTimeMillis() - startTime) + "ms");
 
 			while (true) {
-				this.logger.println(RLServer.class, Level.INFO, "Awaiting new client connection");
+				logger.println(RLServer.class, Level.SYSTEM, "Awaiting new client connection");
 
 				try {
-					Socket clientSocket = serverSocket.accept();
+					Socket socket = server.accept();
 					startTime = System.currentTimeMillis();
-					RLClient tunnel = new RLClient(this, clientSocket);
-					new Thread(tunnel).start();
+					RLClient client = new RLClient(this, socket);
+					new Thread(client).start();
 				} catch (Exception ex) {
-					this.logger.println(RLServer.class, Level.ERROR, "An error occured while trying to accept a client connection");
+					logger.println(RLServer.class, Level.ERROR, "An error occured while trying to accept a client connection");
 					ex.printStackTrace();
 				}
 
-				this.logger.println(RLServer.class, Level.INFO, "New connection processed. Elapsed time: " + (System.currentTimeMillis() - startTime) + "ms");
+				logger.println(RLServer.class, Level.SYSTEM, "New connection processed. Elapsed time: " + (System.currentTimeMillis() - startTime) + "ms");
 			}
 		} catch (Exception e) {
-			this.logger.println(RLServer.class, Level.FATAL, "Unable to start the socket server");
+			logger.println(RLServer.class, Level.FATAL, "Unable to start the socket server");
 			e.printStackTrace();
 			System.exit(1);
 		}

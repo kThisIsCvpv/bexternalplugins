@@ -1,6 +1,6 @@
 package com.kthisiscvpv.socket.client;
 
-public class Packet {
+public class PacketType {
 
 	public static final String JOIN = "JOIN";
 	public static final String LEAVE = "LEAVE";
