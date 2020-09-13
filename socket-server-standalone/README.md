@@ -10,8 +10,8 @@ Use the following tutorial to set up your own socket server.
 
 ### Via Command Line
 
-1. Download [Socket Server Standalone](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/2.0.7/socket-server-standalone.zip).
-2. Unzip the project into a folder.
+1. Download ``socket-server.jar`` and ``run.bat``.
+2. Load the project into a folder.
 3. Launch ``run.bat``.
 4. Retreive your IP address using any provider such as [IPChicken](https://www.ipchicken.com/).
 5. Share that IP address and the default port ``26388`` with your friends.
