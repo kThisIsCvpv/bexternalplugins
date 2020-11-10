@@ -12,7 +12,7 @@ That's just a folder for my socket plugins as a sample, so go ahead and delete i
 
 3.
 
-The API is developed in such a way that there's really only methods you need to be concerned about (easy right?).
+The API is developed in such a way that there's really only 2 methods you need to be concerned about (easy right?).
 
 ``SocketBroadcastPacket`` - YOU broadcast a packet to the server.
 
@@ -20,12 +20,12 @@ The API is developed in such a way that there's really only methods you need to 
 
 The insecurity about this method is that all plugins can see the packets being recieved from your client, so some filtering must be done inside your plugin.
 
-Let's dissect Sotetseg.
+Let's dissect Sotetseg for a closer look.
 
 ```
 ...
 JSONObject payload = new JSONObject();
-payload.put("sotetseg-extended", data);
+payload.put("sotetseg-extended", data); <-- data is some object that we want to transmit to everybody.
 eventBus.post(new SocketBroadcastPacket(payload)); <-- YOU invoke a new broadcast event, so SOCKET can pick up on it.
 ```
 
@@ -36,7 +36,7 @@ public void onSocketReceivePacket(SocketReceivePacket event) { <-- SOCKET invoke
 	if (!payload.has("sotetseg-extended"))
 		return;
 
-	JSONArray data = payload.getJSONArray("sotetseg-extended");
+	JSONArray data = payload.getJSONArray("sotetseg-extended"); <-- We get the data that we transmitted back. In the case above, we sent a JSONArray.
 	...
 }
 ```
