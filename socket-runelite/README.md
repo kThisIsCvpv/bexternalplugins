@@ -14,8 +14,9 @@ That's just a folder for my socket plugins as a sample, so go ahead and delete i
 
 The API is developed in such a way that there's really only methods you need to be concerned about (easy right?).
 
-SocketBroadcastPacket - YOU broadcast a packet to the server.
-SocketReceivePacket - THE SERVER broadcasts a packet to your client.
+``SocketBroadcastPacket`` - YOU broadcast a packet to the server.
+
+``SocketReceivePacket`` - THE SERVER broadcasts a packet to your client.
 
 The insecurity about this method is that all plugins can see the packets being recieved from your client, so some filtering must be done inside your plugin.
 
