@@ -219,8 +219,8 @@ public class PlayerStatusPlugin extends Plugin {
     }
 
     @Subscribe
-    public void onPlayerDeath(PlayerDeath event) {
-        if (event.getPlayer() != this.client.getLocalPlayer())
+    public void onActorDeath(ActorDeath event) {
+        if (event.getActor() != this.client.getLocalPlayer())
             return;
 
         synchronized (this.statusEffects) {

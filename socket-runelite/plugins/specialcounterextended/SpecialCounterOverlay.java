@@ -59,7 +59,7 @@ public class SpecialCounterOverlay extends Overlay {
 
         setPosition(OverlayPosition.DYNAMIC);
         setPriority(OverlayPriority.HIGH);
-        setLayer(OverlayLayer.ALWAYS_ON_TOP);
+        setLayer(OverlayLayer.ABOVE_SCENE);
     }
 
     public void addOverlay(String player, SpecialIcon icon) {

@@ -28,7 +28,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("Socket Player Status Config v2")
+@ConfigGroup("Socket Player Status Config v3")
 public interface PlayerStatusConfig extends Config {
 
     @ConfigItem(
@@ -98,7 +98,7 @@ public interface PlayerStatusConfig extends Config {
             description = "Show players who drank an overload."
     )
     default boolean showOverload() {
-        return true;
+        return false;
     }
 
     @ConfigItem(
