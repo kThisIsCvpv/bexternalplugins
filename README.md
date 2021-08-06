@@ -12,8 +12,8 @@ Please direct any inquires there as well, inside the support channel. Feel free 
 
 Socket is a peer-to-peer content sharing plugin that allows other plugins to send and receive data between members in the same party. All socket plugins listed below are included in the single installation file and can be enabled or disabled as necessary.
 
-- **Repository:** [Click Here](./socket)
-- **Extended Plugins:** [Click Here](./socket/plugins)
+- **Repository:** [Click Here](./socket-runelite)
+- **Extended Plugins:** [Click Here](./socket-runelite/plugins)
 - **Download:** [Click Here](https://github.com/kThisIsCvpv/bexternalplugins/releases/download/2.0.8/socket.jar)
 
 ### Sotetseg
